@@ -185,7 +185,7 @@ export default function Home() {
     if (logo) {
       signatureContent += `
           <tr>
-            <td style="padding-top:15px">
+            <td style="padding-top:4px">
               <img src="${logo}" alt="Company Logo" style="width:160px;height:auto;display:block">
             </td>
           </tr>
@@ -233,127 +233,137 @@ export default function Home() {
     // Clear the status message after 3 seconds
     setTimeout(() => setCopyStatus(""), 3000);
   };
-
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-xl">
+    <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Email Signature Generator</h1>
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="name">Name</Label>
-          <Input
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="John Doe"
-          />
-        </div>
-        <div>
-          <Label htmlFor="title">Title</Label>
-          <Input
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Software Engineer"
-          />
-        </div>
-        <div>
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="john@example.com"
-          />
-        </div>
-        <div>
-          <Label htmlFor="phone">Phone</Label>
-          <Input
-            id="phone"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="+1 (123) 456-7890"
-          />
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Input Fields */}
+        <div className="w-full md:w-1/2 space-y-4">
+          <div>
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="John Doe"
+            />
+          </div>
+          <div>
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Software Engineer"
+            />
+          </div>
+          <div>
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="john@example.com"
+            />
+          </div>
+          <div>
+            <Label htmlFor="phone">Phone</Label>
+            <Input
+              id="phone"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+1 (123) 456-7890"
+            />
+          </div>
+          <div>
+            <Label htmlFor="website">Website</Label>
+            <Input
+              id="website"
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+              placeholder="www.example.com"
+            />
+          </div>
+          <div>
+            <Label htmlFor="location">Location</Label>
+            <Input
+              id="location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="San Angelo, TX"
+            />
+          </div>
+          <div>
+            <Label htmlFor="logo">Logo (max 320x320 pixels)</Label>
+            <Input
+              id="logo"
+              type="file"
+              accept="image/*"
+              onChange={handleLogoUpload}
+              ref={fileInputRef}
+            />
+            {logoError && (
+              <p className="text-red-500 text-sm mt-1">{logoError}</p>
+            )}
+          </div>
+          <Button onClick={copyToClipboard} className="w-full mt-4">
+            Copy Signature
+          </Button>
+          {copyStatus && (
+            <Alert className="mt-4">
+              <AlertDescription>{copyStatus}</AlertDescription>
+            </Alert>
+          )}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" className="w-full mt-4">
+                How to Use
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>How to Use Your New Signature</AlertDialogTitle>
+                <AlertDialogDescription>
+                  1. Fill in your information in the form fields.
+                  <br />
+                  2. Leave any fields blank that you don&apos;t want to include.
+                  <br />
+                  3. Upload a logo if desired (max 320x320 pixels).
+                  <br />
+                  4. Click Copy Signature to copy the HTML to your clipboard.
+                  <br />
+                  5. In your email client, go to signature settings.
+                  <br />
+                  6. Create a new signature or edit an existing one.
+                  <br />
+                  7. Paste the copied HTML into the signature field.
+                  <br />
+                  8. Save your changes in the email client.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogAction>Got it!</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
 
-        <div>
-          <Label htmlFor="website">Website</Label>
-          <Input
-            id="website"
-            value={website}
-            onChange={(e) => setWebsite(e.target.value)}
-            placeholder="www.example.com"
-          />
-        </div>
-        <div>
-          <Label htmlFor="location">Location</Label>
-          <Input
-            id="location"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="San Angelo, TX"
-          />
-        </div>
-        <div>
-          <Label htmlFor="logo">Logo (max 320x320 pixels)</Label>
-          <Input
-            id="logo"
-            type="file"
-            accept="image/*"
-            onChange={handleLogoUpload}
-            ref={fileInputRef}
-          />
-          {logoError && (
-            <p className="text-red-500 text-sm mt-1">{logoError}</p>
-          )}
+        {/* Preview */}
+        <div className="w-full md:w-1/2">
+          <h2 className="text-lg font-semibold mb-2">Preview:</h2>
+          <div className="border rounded-lg shadow-md h-[400px] relative p-4 flex flex-col">
+            <div className="text-gray-400 border-b pb-2 mb-2">To:</div>
+            <div className="text-gray-400 border-b pb-2 mb-2">Subject:</div>
+            <div className="flex-grow relative">
+              <div className="absolute left-0 bottom-0">
+                <div
+                  dangerouslySetInnerHTML={{ __html: generateSignature() }}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div className="mt-6">
-        <h2 className="text-lg font-semibold mb-2">Preview:</h2>
-        <div
-          className="border p-4 rounded"
-          dangerouslySetInnerHTML={{ __html: generateSignature() }}
-        />
-      </div>
-      <Button onClick={copyToClipboard} className="w-full mt-4">
-        Copy Signature
-      </Button>
-      {copyStatus && (
-        <Alert className="mt-4">
-          <AlertDescription>{copyStatus}</AlertDescription>
-        </Alert>
-      )}
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button variant="outline" className="w-full mt-4">
-            How to Use
-          </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>How to Use Your New Signature</AlertDialogTitle>
-            <AlertDialogDescription>
-              1. Fill in your information in the form fields.
-              <br />
-              2. Leave any fields blank that you don&apos;t want to include.
-              <br />
-              3. Upload a logo if desired (max 320x320 pixels).
-              <br />
-              4. Click Copy Signature to copy the HTML to your clipboard.
-              <br />
-              5. In your email client, go to signature settings.
-              <br />
-              6. Create a new signature or edit an existing one.
-              <br />
-              7. Paste the copied HTML into the signature field.
-              <br />
-              8. Save your changes in the email client.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction>Got it!</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
