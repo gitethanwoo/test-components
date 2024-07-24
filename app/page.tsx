@@ -235,8 +235,8 @@ export default function Home() {
   };
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6 md:text-center">Email Signature Generator</h1>
-      <div className="flex flex-col md:flex-row border rounded-lg p-4 gap-12">
+    <h1 className="text-2xl font-bold mb-6">Email Signature Generator</h1>
+    <div className="flex flex-col md:flex-row border rounded-lg p-4 gap-12">
         {/* Input Fields */}
         <div className="w-full md:max-w-sm md:w-1/2 space-y-4">
           <div>
@@ -349,10 +349,9 @@ export default function Home() {
         </div>
 
         {/* Preview */}
-        <div className="w-full md:w-1/2">
-          <h2 className="text-lg font-semibold mb-2">Preview:</h2>
-          <div className="border rounded-lg shadow-md h-[400px] relative p-4 flex flex-col">
-            <div className="text-gray-400 border-b pb-2 mb-2">To:</div>
+        <div className="w-full border-l pl-4">
+      <div className="h-[540px] relative p-2 flex flex-col">
+        <div className="text-gray-400 border-b pb-2 mb-2">To:</div>
             <div className="text-gray-400 border-b pb-2 mb-2">Subject:</div>
             <div className="flex-grow relative">
               <div className="absolute left-0 bottom-0">
