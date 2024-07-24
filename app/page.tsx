@@ -29,29 +29,30 @@ export default function Home() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    const file = event.target.files?.[0]
+    const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onload = (e: ProgressEvent<FileReader>): void => {
-        if (e.target && typeof e.target.result === 'string') {
-          const img = new Image()
+        const result = e.target?.result;
+        if (result && typeof result === 'string') {
+          const img = new Image();
           img.onload = (): void => {
             if (img.width <= 320 && img.height <= 320) {
-              setLogo(e.target.result as string)
-              setLogoError('')
+              setLogo(result);
+              setLogoError('');
             } else {
-              setLogoError('Logo must be 320x320 pixels or smaller')
+              setLogoError('Logo must be 320x320 pixels or smaller');
               if (fileInputRef.current) {
-                fileInputRef.current.value = ''
+                fileInputRef.current.value = '';
               }
             }
-          }
-          img.src = e.target.result
+          };
+          img.src = result;
         }
-      }
-      reader.readAsDataURL(file)
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   const generateSignature = (): string => {
     let signatureContent = `
