@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -17,17 +17,43 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export default function Home() {
-  const [name, setName] = useState('')
-  const [title, setTitle] = useState('')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
-  const [location, setLocation] = useState('')
-  const [copyStatus, setCopyStatus] = useState('')
+  const [name, setName] = useState<string>('')
+  const [title, setTitle] = useState<string>('')
+  const [email, setEmail] = useState<string>('')
+  const [phone, setPhone] = useState<string>('')
+  const [location, setLocation] = useState<string>('')
+  const [website, setWebsite] = useState<string>('')
+  const [copyStatus, setCopyStatus] = useState<string>('')
+  const [logo, setLogo] = useState<string | null>(null)
+  const [logoError, setLogoError] = useState<string>('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Company website as a constant
-  const website = "liquidacre.com"
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const file = event.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (e: ProgressEvent<FileReader>): void => {
+        if (e.target && typeof e.target.result === 'string') {
+          const img = new Image()
+          img.onload = (): void => {
+            if (img.width <= 320 && img.height <= 320) {
+              setLogo(e.target.result as string)
+              setLogoError('')
+            } else {
+              setLogoError('Logo must be 320x320 pixels or smaller')
+              if (fileInputRef.current) {
+                fileInputRef.current.value = ''
+              }
+            }
+          }
+          img.src = e.target.result
+        }
+      }
+      reader.readAsDataURL(file)
+    }
+  }
 
-  const generateSignature = () => {
+  const generateSignature = (): string => {
     let signatureContent = `
       <table cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif;font-size:14px;line-height:1.6;color:rgb(51,51,51)">
         <tbody>
@@ -72,8 +98,9 @@ export default function Home() {
       `
     }
 
-    // Add website
-    signatureContent += `
+    // Add website if provided
+    if (website) {
+      signatureContent += `
                 <tr>
                   <td style="padding-bottom:5px">
                     <table cellpadding="0" cellspacing="0" border="0">
@@ -91,6 +118,7 @@ export default function Home() {
                   </td>
                 </tr>
     `
+    }
 
     // Add phone if provided
     if (phone) {
@@ -136,17 +164,25 @@ export default function Home() {
       `
     }
 
-    // Close the tables and add the logo
+    // Close the tables and add the logo if provided
     signatureContent += `
                 </tbody>
               </table>
             </td>
           </tr>
+    `
+
+    if (logo) {
+      signatureContent += `
           <tr>
             <td style="padding-top:15px">
-              <img src="https://ci3.googleusercontent.com/mail-sig/AIorK4x7R9W4b09Vlhg2GYX_gCIp-3VTMD7Mm944IQ5TOHlfY9xdQ2uC6V6tvP1d2nL7UZIWMb1x8et9Lw60" alt="Liquidacre Logo" style="max-width:160px;height:auto;display:block">
+              <img src="${logo}" alt="Company Logo" style="width:160px;height:auto;display:block">
             </td>
           </tr>
+      `
+    }
+
+    signatureContent += `
         </tbody>
       </table>
     `
@@ -154,7 +190,7 @@ export default function Home() {
     return signatureContent
   }
 
-  const copyToClipboard = async () => {
+  const copyToClipboard = async (): Promise<void> => {
     const signature = generateSignature()
     const plainText = signature.replace(/<[^>]+>/g, '').trim()
 
@@ -212,17 +248,26 @@ export default function Home() {
           <Label htmlFor="location">Location</Label>
           <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="San Angelo, TX" />
         </div>
+        <div>
+          <Label htmlFor="website">Website</Label>
+          <Input id="website" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="www.example.com" />
+        </div>
+        <div>
+          <Label htmlFor="logo">Logo (max 320x320 pixels)</Label>
+          <Input id="logo" type="file" accept="image/*" onChange={handleLogoUpload} ref={fileInputRef} />
+          {logoError && <p className="text-red-500 text-sm mt-1">{logoError}</p>}
+        </div>
+      </div>
       <div className="mt-6">
         <h2 className="text-lg font-semibold mb-2">Preview:</h2>
         <div className="border p-4 rounded" dangerouslySetInnerHTML={{ __html: generateSignature() }} />
       </div>
-      <Button onClick={copyToClipboard} className="w-full">Copy Signature</Button>
-        {copyStatus && (
-          <Alert>
-            <AlertDescription>{copyStatus}</AlertDescription>
-          </Alert>
-        )}
-      </div>
+      <Button onClick={copyToClipboard} className="w-full mt-4">Copy Signature</Button>
+      {copyStatus && (
+        <Alert className="mt-4">
+          <AlertDescription>{copyStatus}</AlertDescription>
+        </Alert>
+      )}
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <Button variant="outline" className="w-full mt-4">How to Use</Button>
@@ -233,11 +278,12 @@ export default function Home() {
             <AlertDialogDescription>
               1. Fill in your information in the form fields.<br/>
               2. Leave any fields blank that you don&apos;t want to include.<br/>
-              3. Click Copy Signature to copy the HTML to your clipboard.<br/>
-              4. In your email client, go to signature settings.<br/>
-              5. Create a new signature or edit an existing one.<br/>
-              6. Paste the copied HTML into the signature field.<br/>
-              7. Save your changes in the email client.
+              3. Upload a logo if desired (max 320x320 pixels).<br/>
+              4. Click Copy Signature to copy the HTML to your clipboard.<br/>
+              5. In your email client, go to signature settings.<br/>
+              6. Create a new signature or edit an existing one.<br/>
+              7. Paste the copied HTML into the signature field.<br/>
+              8. Save your changes in the email client.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
