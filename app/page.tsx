@@ -99,7 +99,7 @@ export default function Home() {
                               <img src="https://lh3.googleusercontent.com/d/1IYy8Z172jZpVoCX2LgjruMti5JIQX_3g" alt="Email" width="16" height="16" style="display:block">
                             </td>
                             <td style="vertical-align:middle">
-                              <a href="mailto:${email}" style="color:rgb(6,131,100);text-decoration-line:none;font-size:14px">${email}</a>
+                              <a href="mailto:${email}" style="color:rgb(16,24,40);text-decoration-line:none;font-size:14px">${email}</a>
                             </td>
                           </tr>
                         </tbody>
@@ -142,7 +142,7 @@ export default function Home() {
                             <img src="https://lh3.googleusercontent.com/d/10UgDSAhm_hDYimyp07y6uZDGnns8p5Kt" alt="Website" width="16" height="16" style="display:block">
                           </td>
                           <td style="vertical-align:middle">
-                            <a href="https://${website}" style="color:rgb(6,131,100);text-decoration-line:none;font-size:14px">${website}</a>
+                            <a href="https://${website}" style="color:rgb(16,24,40);text-decoration-line:none;font-size:14px">${website}</a>
                           </td>
                         </tr>
                       </tbody>
