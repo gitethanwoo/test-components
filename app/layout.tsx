@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "LiquidAcre Email Signature Generator",
-  description: "Made with love for LiquidAcre",
+  title: "Simple Email Signature Generator",
+  description: "Made with love — designbywoo",
 };
 
 export default function RootLayout({
