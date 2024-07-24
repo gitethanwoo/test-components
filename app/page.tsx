@@ -235,10 +235,10 @@ export default function Home() {
   };
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Email Signature Generator</h1>
+      <h1 className="text-2xl font-bold mb-6 md:text-center">Email Signature Generator</h1>
       <div className="flex flex-col md:flex-row gap-6">
         {/* Input Fields */}
-        <div className="w-full md:w-1/2 space-y-4">
+        <div className="w-full mx-auto md:max-w-sm md:w-1/2 space-y-4">
           <div>
             <Label htmlFor="name">Name</Label>
             <Input
