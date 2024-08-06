@@ -7,10 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-const CustomRadioGroup = ({ options, value, onChange }: {
+
+const CustomRadioGroup = ({ options, value, onChange, name }: {
   options: string[];
   value: string;
   onChange: (value: string) => void;
+  name: string;
 }) => (
   <RadioGroup
     value={value}
@@ -18,14 +20,14 @@ const CustomRadioGroup = ({ options, value, onChange }: {
     className="flex space-x-2"
   >
     {options.map((option) => (
-      <div key={option.toLowerCase()}>
+      <div key={`${name}-${option.toLowerCase()}`}>
         <RadioGroupItem
           value={option.toLowerCase()}
-          id={option.toLowerCase()}
+          id={`${name}-${option.toLowerCase()}`}
           className="peer sr-only"
         />
         <Label
-          htmlFor={option.toLowerCase()}
+          htmlFor={`${name}-${option.toLowerCase()}`}
           className="flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md border-2 border-muted bg-popover hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground"
         >
           {option}
@@ -61,10 +63,11 @@ const SubstanceAbuseHistoryForm = () => {
               options={['Yes', 'No', 'Unknown']}
               value={historyOfAbuse}
               onChange={setHistoryOfAbuse}
+              name="history-of-abuse"
             />
           </div>
 
-          {historyOfAbuse === 'yes' && (
+          {historyOfAbuse.toLowerCase() === 'yes' && (
             <>
               <div>
                 <Label htmlFor="last-use-date" className="block mb-2">
@@ -87,6 +90,7 @@ const SubstanceAbuseHistoryForm = () => {
                   options={['Yes', 'No', 'Unknown']}
                   value={attendingGroups}
                   onChange={setAttendingGroups}
+                  name="attending-groups"
                 />
               </div>
 
@@ -98,6 +102,7 @@ const SubstanceAbuseHistoryForm = () => {
                   options={['Yes', 'No', 'Unknown']}
                   value={receivingTreatment}
                   onChange={setReceivingTreatment}
+                  name="receiving-treatment"
                 />
               </div>
             </>
