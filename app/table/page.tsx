@@ -9,6 +9,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { Send, MoreHorizontal } from "lucide-react";
 import { cva } from "class-variance-authority";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { MessageModal } from "@/components/MessageModal";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/datepicker";
+import { format } from "date-fns";
+
 
 type Status = {
   value: string
@@ -115,7 +123,12 @@ function ComboboxPopover({ status, onStatusChange }: { status: string, onStatusC
 
 export default function DataTable() {
   const [data, setData] = useState(initialData);
+  const [filteredData, setFilteredData] = useState(data);
+  const [searchTerm, setSearchTerm] = useState("");
   const toastRef = useRef<{ [key: number]: boolean }>({});
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [messageModalOpen, setMessageModalOpen] = useState(false);
+  const [selectedPerson, setSelectedPerson] = useState<typeof data[0] | null>(null);
 
   const handleStatusChange = useCallback((id: number, newStatus: string) => {
     setData(prevData => {
@@ -134,18 +147,87 @@ export default function DataTable() {
     });
   }, []);
 
+  const handleOpenMessageModal = useCallback((person: typeof data[0]) => {
+    setSelectedPerson(person);
+    setMessageModalOpen(true);
+  }, []);
+
+  const handleSendMessage = useCallback((message: string) => {
+    if (selectedPerson) {
+      toast(`Message sent to ${selectedPerson.name}: ${message}`);
+      // Here you would typically send the message to your backend
+    }
+    setMessageModalOpen(false);
+  }, [selectedPerson]);
+
+  useEffect(() => {
+    const filtered = data.filter(item =>
+      Object.values(item).some(value =>
+        value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+    setFilteredData(filtered);
+  }, [data, searchTerm]);
+
+  const handleSearch = useCallback((term: string) => {
+    setSearchTerm(term);
+    const filtered = data.filter(item =>
+      Object.values(item).some(value =>
+        value.toString().toLowerCase().includes(term.toLowerCase())
+      )
+    );
+    setFilteredData(filtered);
+  }, [data]);
+
+  const handleExport = useCallback(() => {
+    // Ensure consistent order of fields
+    const fields = ['id', 'name', 'status', 'zip', 'referralDate', 'agency'];
+    
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + fields.join(",") + "\n"
+      + data.map(row => 
+        fields.map(field => 
+          // Wrap values in quotes to handle potential commas
+          `"${row[field as keyof typeof row]}"`
+        ).join(",")
+      ).join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    window.open(encodedUri);
+  }, [data]);
+
+  const handleAddPerson = useCallback((newPerson: Omit<typeof data[0], 'id'>) => {
+    const newId = Math.max(...data.map(item => item.id)) + 1;
+    const newData = [...data, { ...newPerson, id: newId }];
+    setData(newData);
+    toast(`${newPerson.name} has been added to the table.`);
+    setIsDialogOpen(false);
+  }, [data]);
+
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 py-8">
       <Toaster />
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">This is meant to demonstrate the status change interaction!</h1>
+
+        <div className="flex flex-col w-480px">
+          <h1 className="text-2xl font-bold">A few key features</h1>
+          <p className="text-sm">Add a person, change their status, search for a person, export to CSV, and send a message!</p>
+        </div>
         <div className="flex space-x-2">
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleExport}>
             <Send className="mr-2 h-4 w-4" /> Export
           </Button>
-          <Button>
-            + Add person
-          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => setIsDialogOpen(true)}>+ Add person</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Person</DialogTitle>
+              </DialogHeader>
+              <AddPersonForm onSubmit={handleAddPerson} onClose={() => setIsDialogOpen(false)} />
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
       <div className="bg-white shadow-md border rounded-lg overflow-hidden">
@@ -157,9 +239,11 @@ export default function DataTable() {
               <Button variant="outline">Groups</Button>
             </div>
             <div className="flex flex-wrap space-x-2 w-full md:w-auto">
-              <input
+              <Input
                 type="text"
                 placeholder="Search"
+                value={searchTerm}
+                onChange={(e) => handleSearch(e.target.value)}
                 className="px-3 py-1 border rounded-md mb-2 md:mb-0 w-full md:w-auto"
               />
               <Button variant="outline" className="mb-2 md:mb-0">
@@ -183,7 +267,7 @@ export default function DataTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((row) => (
+            {filteredData.map((row) => (
               <TableRow key={row.id}>
                 <TableCell>{row.name}</TableCell>
                 <TableCell>
@@ -196,7 +280,7 @@ export default function DataTable() {
                 <TableCell className="hidden md:table-cell">{row.referralDate}</TableCell>
                 <TableCell className="hidden md:table-cell">{row.agency}</TableCell>
                 <TableCell>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={() => handleOpenMessageModal(row)}>
                     <Send className="h-4 w-4" />
                   </Button>
                   <Button variant="ghost" size="sm">
@@ -217,6 +301,75 @@ export default function DataTable() {
           </Button>
         </div>
       </div>
+      <MessageModal
+        isOpen={messageModalOpen}
+        onClose={() => setMessageModalOpen(false)}
+        onSend={handleSendMessage}
+        recipientName={selectedPerson?.name || ''}
+      />
     </div>
+  );
+}
+function AddPersonForm({ onSubmit, onClose }: { onSubmit: (person: Omit<typeof initialData[0], 'id'>) => void, onClose: () => void }) {
+  const [formData, setFormData] = useState({
+    name: "",
+    status: "prospective_mom",
+    zip: "",
+    referralDate: "",
+    agency: ""
+  });
+
+  const [referralDate, setReferralDate] = useState<Date | undefined>(undefined);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const submissionData = {
+      ...formData,
+      referralDate: referralDate ? format(referralDate, "MM/dd/yy") : "",
+    };
+    onSubmit(submissionData);
+    onClose();
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="name">Name</Label>
+        <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="status">Status</Label>
+        <Select value={formData.status} onValueChange={(value) => handleChange({ target: { name: 'status', value } } as any)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a status" />
+          </SelectTrigger>
+          <SelectContent>
+            {statuses.map(status => (
+              <SelectItem key={status.value} value={status.value}>{status.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="zip">Zip</Label>
+        <Input id="zip" name="zip" value={formData.zip} onChange={handleChange} required />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="referralDate">Referral Date</Label>
+        <DatePicker
+          date={referralDate}
+          setDate={setReferralDate}
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="agency">Agency</Label>
+        <Input id="agency" name="agency" value={formData.agency} onChange={handleChange} required />
+      </div>
+      <Button type="submit">Add Person</Button>
+    </form>
   );
 }
