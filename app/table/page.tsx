@@ -138,7 +138,7 @@ export default function DataTable() {
     <div className="container mx-auto p-4">
       <Toaster />
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Your People</h1>
+        <h1 className="text-2xl font-bold">This is meant to demonstrate the status change interaction!</h1>
         <div className="flex space-x-2">
           <Button variant="outline">
             <Send className="mr-2 h-4 w-4" /> Export
