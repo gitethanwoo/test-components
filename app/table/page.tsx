@@ -148,24 +148,24 @@ export default function DataTable() {
           </Button>
         </div>
       </div>
-      <div className="bg-white shadow-md rounded-lg overflow-hidden">
-        <div className="p-4 border-b">
-          <div className="flex justify-between items-center">
-            <div className="space-x-2">
+      <div className="bg-white shadow-md border rounded-lg overflow-hidden">
+        <div className="p-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+            <div className="flex space-x-2 w-full md:w-auto">
               <Button variant="outline">Advocates</Button>
               <Button variant="outline">Moms</Button>
               <Button variant="outline">Groups</Button>
             </div>
-            <div className="flex space-x-2">
+            <div className="flex flex-wrap space-x-2 w-full md:w-auto">
               <input
                 type="text"
                 placeholder="Search"
-                className="px-3 py-1 border rounded-md"
+                className="px-3 py-1 border rounded-md mb-2 md:mb-0 w-full md:w-auto"
               />
-              <Button variant="outline">
+              <Button variant="outline" className="mb-2 md:mb-0">
                 Columns
               </Button>
-              <Button variant="outline">
+              <Button variant="outline" className="mb-2 md:mb-0">
                 Filters
               </Button>
             </div>
@@ -176,10 +176,9 @@ export default function DataTable() {
             <TableRow>
               <TableHead>Mom Name</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Paired Advocate</TableHead>
-              <TableHead>Zip</TableHead>
-              <TableHead>Referral Date</TableHead>
-              <TableHead>Agency</TableHead>
+              <TableHead className="hidden md:table-cell">Zip</TableHead>
+              <TableHead className="hidden md:table-cell">Referral Date</TableHead>
+              <TableHead className="hidden md:table-cell">Agency</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -193,9 +192,9 @@ export default function DataTable() {
                     onStatusChange={(newStatus) => handleStatusChange(row.id, newStatus)}
                   />
                 </TableCell>
-                <TableCell>{row.zip}</TableCell>
-                <TableCell>{row.referralDate}</TableCell>
-                <TableCell>{row.agency}</TableCell>
+                <TableCell className="hidden md:table-cell">{row.zip}</TableCell>
+                <TableCell className="hidden md:table-cell">{row.referralDate}</TableCell>
+                <TableCell className="hidden md:table-cell">{row.agency}</TableCell>
                 <TableCell>
                   <Button variant="ghost" size="sm">
                     <Send className="h-4 w-4" />
