@@ -1,151 +1,34 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Toaster, toast } from "sonner";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { Send, MoreHorizontal } from "lucide-react";
-import { cva } from "class-variance-authority";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner"
+import { statuses } from "./utils/constants";
+
+
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Send, LightbulbIcon } from "lucide-react";
 import { MessageModal } from "@/components/MessageModal";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DatePicker } from "@/components/ui/datepicker";
-import { format } from "date-fns";
+import ComboboxPopover from './components/ComboboxPopover';
+import AddPersonForm from './components/AddPersonForm';
+import { useTableData } from './hooks/useTableData';
+import axios from 'axios';
 
-
-type Status = {
-  value: string
-  label: string
-}
-
-const statuses: Status[] = [
-  { value: "prospective_mom", label: "Prospective Mom" },
-  { value: "waiting_pre_assessment", label: "Waiting for Pre-Assessment" },
-  { value: "waiting_to_be_paired", label: "Waiting to be Paired" },
-  { value: "paired_with_advocate", label: "Paired with Advocate" },
-  { value: "group_classes", label: "Group Classes" },
-  { value: "completed", label: "Completed" },
-  { value: "false_start", label: "False Start" },
-  { value: "paused", label: "Paused" },
-  { value: "discharged", label: "Discharged" },
-  { value: "served_wo_program", label: "Served w/o Program Engagement" }
-];
-
-const initialData = [
-  { id: 1, name: "Ava Kassing", status: "false_start", zip: "33064", referralDate: "02/28/23", agency: "Child Protective Services" },
-  { id: 2, name: "Dianna Kastner", status: "prospective_mom", zip: "33069", referralDate: "1/31/14", agency: "Hope Women's Center" },
-  { id: 3, name: "Olivia Jules", status: "waiting_pre_assessment", zip: "33319", referralDate: "7/11/19", agency: "Childnet" },
-  { id: 4, name: "Emma Johnson", status: "waiting_to_be_paired", zip: "33069", referralDate: "5/19/12", agency: "His Caring Place" },
-  { id: 5, name: "Anne Smith", status: "discharged", zip: "33068", referralDate: "1/28/17", agency: "Child Protective Services" },
-];
-
-type StatusColor = {
-  [key: string]: string;
+// Add this type definition at the top of the file
+type AIResponse = {
+  insight: string;
+  recommendation: string;
 };
-
-const statusColors: StatusColor = {
-  false_start: "bg-gray-50",
-  prospective_mom: "bg-blue-50",
-  waiting_pre_assessment: "bg-yellow-50",
-  waiting_to_be_paired: "bg-red-50",
-  paired_with_advocate: "bg-green-50",
-  paused: "bg-gray-50",
-  discharged: "bg-gray-50",
-  completed: "bg-gray-50",
-  served_wo_program: "bg-pink-50",
-  group_classes: "bg-indigo-50",
-};
-
-function ComboboxPopover({ status, onStatusChange }: { status: string, onStatusChange: (value: string) => void }) {
-  const [open, setOpen] = React.useState(false);
-  const selectedStatus = statuses.find(s => s.value === status) || statuses[0];
-
-  const triggerButtonVariants = cva(
-    "justify-start text-left font-normal",
-    {
-      variants: {
-        variant: statusColors
-      },
-    }
-  );
-
-  const popoverItemVariants = cva(
-    "justify-start text-left font-normal mb-1 py-2 px-3 cursor-pointer hover:bg-gray-100",
-    {
-      variants: {
-        variant: statusColors
-      },
-    }
-  );
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className={triggerButtonVariants({ variant: status })}
-        >
-          {selectedStatus.label}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="p-0" side="bottom" align="start">
-        <Command>
-          <CommandInput placeholder="Change status..." className="border-none focus:ring-0" />
-          <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup>
-              {statuses.map((s) => (
-                <CommandItem
-                  key={s.value}
-                  value={s.value}
-                  onSelect={(value) => {
-                    onStatusChange(value);
-                    setOpen(false);
-                  }}
-                  className={popoverItemVariants({ variant: s.value })}
-                >
-                  <span>{s.label}</span>
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  );
-}
 
 export default function DataTable() {
-  const [data, setData] = useState(initialData);
+  const { data, setData, handleStatusChange } = useTableData();
   const [filteredData, setFilteredData] = useState(data);
   const [searchTerm, setSearchTerm] = useState("");
-  const toastRef = useRef<{ [key: number]: boolean }>({});
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState<typeof data[0] | null>(null);
-
-  const handleStatusChange = useCallback((id: number, newStatus: string) => {
-    setData(prevData => {
-      const updatedData = prevData.map(item =>
-        item.id === id ? { ...item, status: newStatus } : item
-      );
-      const updatedItem = updatedData.find(item => item.id === id);
-      if (updatedItem && !toastRef.current[id]) {
-        toast(`${updatedItem.name}'s status changed to ${statuses.find(s => s.value === newStatus)?.label || newStatus}`);
-        toastRef.current[id] = true;
-        setTimeout(() => {
-          toastRef.current[id] = false;
-        }, 100);
-      }
-      return updatedData;
-    });
-  }, []);
+  const [aiResponse, setAiResponse] = useState<AIResponse | null>(null);
 
   const handleOpenMessageModal = useCallback((person: typeof data[0]) => {
     setSelectedPerson(person);
@@ -154,11 +37,67 @@ export default function DataTable() {
 
   const handleSendMessage = useCallback((message: string) => {
     if (selectedPerson) {
-      toast(`Message sent to ${selectedPerson.name}: ${message}`);
-      // Here you would typically send the message to your backend
+      axios.post('http://localhost:3001/api/send-message', {
+        recipientId: selectedPerson.id,
+        message
+      })
+        .then(() => {
+          toast(`Message sent to ${selectedPerson.name}: ${message}`);
+          setMessageModalOpen(false);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          toast.error('Failed to send message. Please try again.');
+        });
     }
-    setMessageModalOpen(false);
   }, [selectedPerson]);
+
+  const handleStatusChangeWithToast = useCallback((id: number, newStatus: string) => {
+    handleStatusChange(id, newStatus)
+      .then(updatedItem => {
+        toast(`${updatedItem.name}'s status changed to ${statuses.find(s => s.value === newStatus)?.label || newStatus}`);
+      })
+      .catch(() => {
+        toast.error('Failed to update status. Please try again.');
+      });
+  }, [handleStatusChange]);
+
+  const handleGetAIInsights = useCallback((person: typeof data[0]) => {
+    const momInfo = `Name: ${person.name}, Status: ${person.status}, Agency: ${person.agency}, Referral Date: ${person.referralDate}`;
+    axios.post('/api/wordware', { momInfo })
+      .then((response) => {
+        if (response.data.error) {
+          throw new Error(response.data.error);
+        }
+        const aiGeneratedResponse = response.data.outputs || response.data;
+        setAiResponse(aiGeneratedResponse as AIResponse);
+        toast.success(`AI insights generated for ${person.name}`);
+      })
+      .catch(error => {
+        console.error('Error:', error.response ? error.response.data : error.message);
+        toast.error(`Failed to generate AI insights: ${error.response ? error.response.data.details : error.message}`);
+      });
+  }, []);
+
+  useEffect(() => {
+    // Fetch initial data from the server
+    axios.get('http://localhost:3001/api/data')
+      .then(response => {
+        setData(response.data);
+        setFilteredData(response.data);
+      })
+      .catch(error => console.error('Error fetching data:', error));
+  }, []);
+
+  const handleAddPerson = useCallback((newPerson: Omit<typeof data[0], 'id'>) => {
+    axios.post('http://localhost:3001/api/data', newPerson)
+      .then(response => {
+        const addedPerson = response.data;
+        setData(prevData => [...prevData, addedPerson]);
+        toast(`${addedPerson.name} has been added to the table.`);
+      })
+      .catch(error => console.error('Error adding person:', error));
+  }, []);
 
   useEffect(() => {
     const filtered = data.filter(item =>
@@ -196,14 +135,6 @@ export default function DataTable() {
     window.open(encodedUri);
   }, [data]);
 
-  const handleAddPerson = useCallback((newPerson: Omit<typeof data[0], 'id'>) => {
-    const newId = Math.max(...data.map(item => item.id)) + 1;
-    const newData = [...data, { ...newPerson, id: newId }];
-    setData(newData);
-    toast(`${newPerson.name} has been added to the table.`);
-    setIsDialogOpen(false);
-  }, [data]);
-
   return (
     <div className="container mx-auto p-4 py-8">
       <Toaster />
@@ -217,17 +148,7 @@ export default function DataTable() {
           <Button variant="outline" onClick={handleExport}>
             <Send className="mr-2 h-4 w-4" /> Export
           </Button>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => setIsDialogOpen(true)}>+ Add person</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add New Person</DialogTitle>
-              </DialogHeader>
-              <AddPersonForm onSubmit={handleAddPerson} onClose={() => setIsDialogOpen(false)} />
-            </DialogContent>
-          </Dialog>
+          <AddPersonForm onSubmit={handleAddPerson} />
         </div>
       </div>
       <div className="bg-white shadow-md border rounded-lg overflow-hidden">
@@ -273,7 +194,7 @@ export default function DataTable() {
                 <TableCell>
                   <ComboboxPopover
                     status={row.status}
-                    onStatusChange={(newStatus) => handleStatusChange(row.id, newStatus)}
+                    onStatusChange={(newStatus) => handleStatusChangeWithToast(row.id, newStatus)}
                   />
                 </TableCell>
                 <TableCell className="hidden md:table-cell">{row.zip}</TableCell>
@@ -283,8 +204,8 @@ export default function DataTable() {
                   <Button variant="ghost" size="sm" onClick={() => handleOpenMessageModal(row)}>
                     <Send className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm">
-                    <MoreHorizontal className="h-4 w-4" />
+                  <Button variant="ghost" size="sm" onClick={() => handleGetAIInsights(row)}>
+                    <LightbulbIcon className="h-4 w-4" />
                   </Button>
                 </TableCell>
               </TableRow>
@@ -301,6 +222,19 @@ export default function DataTable() {
           </Button>
         </div>
       </div>
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold mb-4">AI Insights</h2>
+        {aiResponse ? (
+          <div className="bg-white shadow-md border rounded-lg overflow-hidden">
+            <div className="p-4">
+              <h3 className="text-lg font-semibold">Recommendation:</h3>
+              <p className="mt-2">{aiResponse.recommendation}</p>
+            </div>
+          </div>
+        ) : (
+          <p className="text-gray-500 italic">Send a message to a mom to get AI-generated insights.</p>
+        )}
+      </div>
       <MessageModal
         isOpen={messageModalOpen}
         onClose={() => setMessageModalOpen(false)}
@@ -308,68 +242,5 @@ export default function DataTable() {
         recipientName={selectedPerson?.name || ''}
       />
     </div>
-  );
-}
-function AddPersonForm({ onSubmit, onClose }: { onSubmit: (person: Omit<typeof initialData[0], 'id'>) => void, onClose: () => void }) {
-  const [formData, setFormData] = useState({
-    name: "",
-    status: "prospective_mom",
-    zip: "",
-    referralDate: "",
-    agency: ""
-  });
-
-  const [referralDate, setReferralDate] = useState<Date | undefined>(undefined);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const submissionData = {
-      ...formData,
-      referralDate: referralDate ? format(referralDate, "MM/dd/yy") : "",
-    };
-    onSubmit(submissionData);
-    onClose();
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
-        <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="status">Status</Label>
-        <Select value={formData.status} onValueChange={(value) => handleChange({ target: { name: 'status', value } } as any)}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select a status" />
-          </SelectTrigger>
-          <SelectContent>
-            {statuses.map(status => (
-              <SelectItem key={status.value} value={status.value}>{status.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="zip">Zip</Label>
-        <Input id="zip" name="zip" value={formData.zip} onChange={handleChange} required />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="referralDate">Referral Date</Label>
-        <DatePicker
-          date={referralDate}
-          setDate={setReferralDate}
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="agency">Agency</Label>
-        <Input id="agency" name="agency" value={formData.agency} onChange={handleChange} required />
-      </div>
-      <Button type="submit">Add Person</Button>
-    </form>
   );
 }
