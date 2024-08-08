@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Simple Email Signature Generator",
+  title: "Demo",
   description: "Made with love — designbywoo",
 };
 

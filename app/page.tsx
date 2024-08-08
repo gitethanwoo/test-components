@@ -1,368 +1,246 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useCallback, useEffect } from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner"
+import { statuses } from "./table/utils/constants";
+
+
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { Send, LightbulbIcon } from "lucide-react";
+import { MessageModal } from "@/components/MessageModal";
+import ComboboxPopover from './table/components/ComboboxPopover';
+import AddPersonForm from './table/components/AddPersonForm';
+import { useTableData } from './table/hooks/useTableData';
+import axios from 'axios';
 
-export default function Home() {
-  const [name, setName] = useState<string>("");
-  const [title, setTitle] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [phone, setPhone] = useState<string>("");
-  const [location, setLocation] = useState<string>("");
-  const [website, setWebsite] = useState<string>("");
-  const [copyStatus, setCopyStatus] = useState<string>("");
-  const [logo, setLogo] = useState<string | null>(null);
-  const [logoError, setLogoError] = useState<string>("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
+// Add this type definition at the top of the file
+type AIResponse = {
+  insight: string;
+  recommendation: string;
+};
 
-  const handleLogoUpload = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ): void => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: ProgressEvent<FileReader>): void => {
-        const result = e.target?.result;
-        if (result && typeof result === "string") {
-          const img = new Image();
-          img.onload = (): void => {
-            if (img.width <= 320 && img.height <= 320) {
-              setLogo(result);
-              setLogoError("");
-            } else {
-              setLogoError("Logo must be 320x320 pixels or smaller");
-              if (fileInputRef.current) {
-                fileInputRef.current.value = "";
-              }
-            }
-          };
-          img.src = result;
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+export default function DataTable() {
+  const { data, setData, handleStatusChange } = useTableData();
+  const [filteredData, setFilteredData] = useState(data);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [messageModalOpen, setMessageModalOpen] = useState(false);
+  const [selectedPerson, setSelectedPerson] = useState<typeof data[0] | null>(null);
+  const [aiResponse, setAiResponse] = useState<AIResponse | null>(null);
 
-  const generateSignature = (): string => {
-    let signatureContent = `
-      <table cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif;font-size:14px;line-height:1.6;color:rgb(51,51,51)">
-        <tbody>
-          <tr>
-            <td>
-              <table cellpadding="0" cellspacing="0" border="0">
-                <tbody>
-    `;
+  const handleOpenMessageModal = useCallback((person: typeof data[0]) => {
+    setSelectedPerson(person);
+    setMessageModalOpen(true);
+  }, []);
 
-    // Add name and title if provided
-    if (name || title) {
-      signatureContent += `
-                  <tr>
-                    <td style="padding-bottom:10px">
-                      ${
-                        name
-                          ? `<strong style="color:rgb(16,24,40);font-size:16px">${name}</strong>`
-                          : ""
-                      }
-                      ${name && title ? "<br>" : ""}
-                      ${
-                        title
-                          ? `<span style="color:rgb(102,112,133);font-size:14px">${title}</span>`
-                          : ""
-                      }
-                    </td>
-                  </tr>
-      `;
-    }
-
-    // Add email if provided
-    if (email) {
-      signatureContent += `
-                  <tr>
-                    <td style="padding-bottom:5px">
-                      <table cellpadding="0" cellspacing="0" border="0">
-                        <tbody>
-                          <tr>
-                            <td style="padding-right:8px;vertical-align:middle">
-                              <img src="https://lh3.googleusercontent.com/d/1IYy8Z172jZpVoCX2LgjruMti5JIQX_3g" alt="Email" width="16" height="16" style="display:block">
-                            </td>
-                            <td style="vertical-align:middle">
-                              <a href="mailto:${email}" style="color:rgb(16,24,40);text-decoration-line:none;font-size:14px">${email}</a>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </td>
-                  </tr>
-      `;
-    }
-
-    // Add phone if provided
-    if (phone) {
-      signatureContent += `
-                  <tr>
-                    <td style="padding-bottom:5px">
-                      <table cellpadding="0" cellspacing="0" border="0">
-                        <tbody>
-                          <tr>
-                            <td style="padding-right:8px;vertical-align:middle">
-                              <img src="https://lh3.googleusercontent.com/d/1VTqPMIoSVTNL-m54GGXNpyQEEai6cKvi" alt="Phone" width="16" height="16" style="display:block">
-                            </td>
-                            <td style="vertical-align:middle">
-                              <span style="color:rgb(16,24,40);font-size:14px">${phone}</span>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </td>
-                  </tr>
-      `;
-    }
-    // Add website if provided
-    if (website) {
-      signatureContent += `
-                <tr>
-                  <td style="padding-bottom:5px">
-                    <table cellpadding="0" cellspacing="0" border="0">
-                      <tbody>
-                        <tr>
-                          <td style="padding-right:8px;vertical-align:middle">
-                            <img src="https://lh3.googleusercontent.com/d/10UgDSAhm_hDYimyp07y6uZDGnns8p5Kt" alt="Website" width="16" height="16" style="display:block">
-                          </td>
-                          <td style="vertical-align:middle">
-                            <a href="https://${website}" style="color:rgb(16,24,40);text-decoration-line:none;font-size:14px">${website}</a>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                </tr>
-    `;
-    }
-
-    // Add location if provided
-    if (location) {
-      signatureContent += `
-                  <tr>
-                    <td>
-                      <table cellpadding="0" cellspacing="0" border="0">
-                        <tbody>
-                          <tr>
-                            <td style="padding-right:8px;vertical-align:middle">
-                              <img src="https://lh3.googleusercontent.com/d/13G5nLAXA-_ByAyKPVNqrzuoe5smdg01y" alt="Location" width="16" height="16" style="display:block">
-                            </td>
-                            <td style="vertical-align:middle">
-                              <span style="color:rgb(16,24,40);font-size:14px">${location}</span>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </td>
-                  </tr>
-      `;
-    }
-
-    // Close the tables and add the logo if provided
-    signatureContent += `
-                </tbody>
-              </table>
-            </td>
-          </tr>
-    `;
-
-    if (logo) {
-      signatureContent += `
-          <tr>
-            <td style="padding-top:4px">
-              <img src="${logo}" alt="Company Logo" style="width:160px;height:auto;display:block">
-            </td>
-          </tr>
-      `;
-    }
-
-    signatureContent += `
-        </tbody>
-      </table>
-    `;
-
-    return signatureContent;
-  };
-
-  const copyToClipboard = async (): Promise<void> => {
-    const signature = generateSignature();
-    const plainText = signature.replace(/<[^>]+>/g, "").trim();
-
-    try {
-      if (navigator.clipboard && navigator.clipboard.write) {
-        const clipboardItem = new ClipboardItem({
-          "text/html": new Blob([signature], { type: "text/html" }),
-          "text/plain": new Blob([plainText], { type: "text/plain" }),
+  const handleSendMessage = useCallback((message: string) => {
+    if (selectedPerson) {
+      axios.post('http://localhost:3001/api/send-message', {
+        recipientId: selectedPerson.id,
+        message
+      })
+        .then(() => {
+          toast(`Message sent to ${selectedPerson.name}: ${message}`);
+          setMessageModalOpen(false);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          toast.error('Failed to send message. Please try again.');
         });
-        await navigator.clipboard.write([clipboardItem]);
-      } else {
-        // Fallback for browsers that don't support the Clipboard API
-        const tempElement = document.createElement("div");
-        tempElement.innerHTML = signature;
-        document.body.appendChild(tempElement);
-        const range = document.createRange();
-        range.selectNodeContents(tempElement);
-        const selection = window.getSelection();
-        selection?.removeAllRanges();
-        selection?.addRange(range);
-        document.execCommand("copy");
-        document.body.removeChild(tempElement);
-      }
-      setCopyStatus("Signature copied to clipboard!");
-    } catch (err) {
-      console.error("Failed to copy: ", err);
-      setCopyStatus("Failed to copy signature. Please try again.");
     }
+  }, [selectedPerson]);
 
-    // Clear the status message after 3 seconds
-    setTimeout(() => setCopyStatus(""), 3000);
-  };
+  const handleStatusChangeWithToast = useCallback((id: number, newStatus: string) => {
+    handleStatusChange(id, newStatus)
+      .then(updatedItem => {
+        toast(`${updatedItem.name}'s status changed to ${statuses.find(s => s.value === newStatus)?.label || newStatus}`);
+      })
+      .catch(() => {
+        toast.error('Failed to update status. Please try again.');
+      });
+  }, [handleStatusChange]);
+
+  const handleGetAIInsights = useCallback((person: typeof data[0]) => {
+    const momInfo = `Name: ${person.name}, Status: ${person.status}, Agency: ${person.agency}, Referral Date: ${person.referralDate}`;
+    axios.post('/api/wordware', { momInfo })
+      .then((response) => {
+        if (response.data.error) {
+          throw new Error(response.data.error);
+        }
+        const aiGeneratedResponse = response.data.outputs || response.data;
+        setAiResponse(aiGeneratedResponse as AIResponse);
+        toast.success(`AI insights generated for ${person.name}`);
+      })
+      .catch(error => {
+        console.error('Error:', error.response ? error.response.data : error.message);
+        toast.error(`Failed to generate AI insights: ${error.response ? error.response.data.details : error.message}`);
+      });
+  }, []);
+
+  useEffect(() => {
+    // Fetch initial data from the server
+    axios.get('http://localhost:3001/api/data')
+      .then(response => {
+        setData(response.data);
+        setFilteredData(response.data);
+      })
+      .catch(error => console.error('Error fetching data:', error));
+  }, []);
+
+  const handleAddPerson = useCallback((newPerson: Omit<typeof data[0], 'id'>) => {
+    axios.post('http://localhost:3001/api/data', newPerson)
+      .then(response => {
+        const addedPerson = response.data;
+        setData(prevData => [...prevData, addedPerson]);
+        toast(`${addedPerson.name} has been added to the table.`);
+      })
+      .catch(error => console.error('Error adding person:', error));
+  }, []);
+
+  useEffect(() => {
+    const filtered = data.filter(item =>
+      Object.values(item).some(value =>
+        value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+    setFilteredData(filtered);
+  }, [data, searchTerm]);
+
+  const handleSearch = useCallback((term: string) => {
+    setSearchTerm(term);
+    const filtered = data.filter(item =>
+      Object.values(item).some(value =>
+        value.toString().toLowerCase().includes(term.toLowerCase())
+      )
+    );
+    setFilteredData(filtered);
+  }, [data]);
+
+  const handleExport = useCallback(() => {
+    // Ensure consistent order of fields
+    const fields = ['id', 'name', 'status', 'zip', 'referralDate', 'agency'];
+    
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + fields.join(",") + "\n"
+      + data.map(row => 
+        fields.map(field => 
+          // Wrap values in quotes to handle potential commas
+          `"${row[field as keyof typeof row]}"`
+        ).join(",")
+      ).join("\n");
+
+    const encodedUri = encodeURI(csvContent);
+    window.open(encodedUri);
+  }, [data]);
+
   return (
-    <div className="container mx-auto p-6">
-    <h1 className="text-2xl font-bold mb-6">Email Signature Generator</h1>
-    <div className="flex flex-col md:flex-row border rounded-lg shadow-sm px-4 gap-12">
-        {/* Input Fields */}
-        <div className="w-full md:max-w-sm md:w-1/2 py-4 space-y-4">
-          <div>
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="John Doe"
-            />
-          </div>
-          <div>
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Software Engineer"
-            />
-          </div>
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="john@example.com"
-            />
-          </div>
-          <div>
-            <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="+1 (123) 456-7890"
-            />
-          </div>
-          <div>
-            <Label htmlFor="website">Website</Label>
-            <Input
-              id="website"
-              value={website}
-              onChange={(e) => setWebsite(e.target.value)}
-              placeholder="www.example.com"
-            />
-          </div>
-          <div>
-            <Label htmlFor="location">Location</Label>
-            <Input
-              id="location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="San Angelo, TX"
-            />
-          </div>
-          <div>
-            <Label htmlFor="logo">Logo (max 320x320 pixels)</Label>
-            <Input
-              id="logo"
-              type="file"
-              accept="image/*"
-              onChange={handleLogoUpload}
-              ref={fileInputRef}
-            />
-            {logoError && (
-              <p className="text-red-500 text-sm mt-1">{logoError}</p>
-            )}
-          </div>
-          <Button onClick={copyToClipboard} className="w-full mt-4">
-            Copy Signature
-          </Button>
-          {copyStatus && (
-            <Alert className="mt-4">
-              <AlertDescription>{copyStatus}</AlertDescription>
-            </Alert>
-          )}
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" className="w-full mt-4">
-                How to Use
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>How to Use Your New Signature</AlertDialogTitle>
-                <AlertDialogDescription>
-                  1. Fill in your information in the form fields.
-                  <br />
-                  2. Leave any fields blank that you don&apos;t want to include.
-                  <br />
-                  3. Upload a logo if desired (max 320x320 pixels).
-                  <br />
-                  4. Click Copy Signature to copy the HTML to your clipboard.
-                  <br />
-                  5. In your email client, go to signature settings.
-                  <br />
-                  6. Create a new signature or edit an existing one.
-                  <br />
-                  7. Paste the copied HTML into the signature field.
-                  <br />
-                  8. Save your changes in the email client.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogAction>Got it!</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
+    <div className="container mx-auto p-4 py-8">
+      <Toaster />
+      <div className="flex justify-between items-center mb-4">
 
-        {/* Preview */}
-        <div className="w-full md:border-l pl-4">
-      <div className="h-[540px] relative px-4 py-4 flex flex-col">
-        <div className="text-gray-400 border-b pb-2 mb-2">To:</div>
-            <div className="text-gray-400 border-b pb-2 mb-2">Subject:</div>
-            <div className="flex-grow relative">
-              <div className="absolute left-0 bottom-0">
-                <div
-                  dangerouslySetInnerHTML={{ __html: generateSignature() }}
-                />
-              </div>
+        <div className="flex flex-col w-480px">
+          <h1 className="text-2xl font-bold">A few key features</h1>
+          <p className="text-sm">Add a person, change their status, search for a person, export to CSV, and send a message!</p>
+        </div>
+        <div className="flex space-x-2">
+          <Button variant="outline" onClick={handleExport}>
+            <Send className="mr-2 h-4 w-4" /> Export
+          </Button>
+          <AddPersonForm onSubmit={handleAddPerson} />
+        </div>
+      </div>
+      <div className="bg-white shadow-md border rounded-lg overflow-hidden">
+        <div className="p-4">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+            <div className="flex space-x-2 w-full md:w-auto">
+              <Button variant="outline">Advocates</Button>
+              <Button variant="outline">Moms</Button>
+              <Button variant="outline">Groups</Button>
+            </div>
+            <div className="flex flex-wrap space-x-2 w-full md:w-auto">
+              <Input
+                type="text"
+                placeholder="Search"
+                value={searchTerm}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="px-3 py-1 border rounded-md mb-2 md:mb-0 w-full md:w-auto"
+              />
+              <Button variant="outline" className="mb-2 md:mb-0">
+                Columns
+              </Button>
+              <Button variant="outline" className="mb-2 md:mb-0">
+                Filters
+              </Button>
             </div>
           </div>
         </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Mom Name</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="hidden md:table-cell">Zip</TableHead>
+              <TableHead className="hidden md:table-cell">Referral Date</TableHead>
+              <TableHead className="hidden md:table-cell">Agency</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredData.map((row) => (
+              <TableRow key={row.id}>
+                <TableCell>{row.name}</TableCell>
+                <TableCell>
+                  <ComboboxPopover
+                    status={row.status}
+                    onStatusChange={(newStatus) => handleStatusChangeWithToast(row.id, newStatus)}
+                  />
+                </TableCell>
+                <TableCell className="hidden md:table-cell">{row.zip}</TableCell>
+                <TableCell className="hidden md:table-cell">{row.referralDate}</TableCell>
+                <TableCell className="hidden md:table-cell">{row.agency}</TableCell>
+                <TableCell>
+                  <Button variant="ghost" size="sm" onClick={() => handleOpenMessageModal(row)}>
+                    <Send className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleGetAIInsights(row)}>
+                    <LightbulbIcon className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        <div className="p-4 border-t flex justify-between items-center">
+          <Button variant="outline" disabled>
+            Previous
+          </Button>
+          <span>Page 1 of 10</span>
+          <Button variant="outline">
+            Next
+          </Button>
+        </div>
       </div>
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold mb-4">AI Insights</h2>
+        {aiResponse ? (
+          <div className="bg-white shadow-md border rounded-lg overflow-hidden">
+            <div className="p-4">
+              <h3 className="text-lg font-semibold">Recommendation:</h3>
+              <p className="mt-2">{aiResponse.recommendation}</p>
+            </div>
+          </div>
+        ) : (
+          <p className="text-gray-500 italic">Send a message to a mom to get AI-generated insights.</p>
+        )}
+      </div>
+      <MessageModal
+        isOpen={messageModalOpen}
+        onClose={() => setMessageModalOpen(false)}
+        onSend={handleSendMessage}
+        recipientName={selectedPerson?.name || ''}
+      />
     </div>
   );
 }
