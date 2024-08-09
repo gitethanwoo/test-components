@@ -19,7 +19,7 @@ interface AttendanceTrackerProps {
 
 const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({ eventId, isVirtual, attendees }) => {
   const router = useRouter();
-  const [attendanceCode, setAttendanceCode] = useState('');
+  const [attendanceCode, setAttendanceCode] = useState<string>('');
   const [manualAttendance, setManualAttendance] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -27,10 +27,10 @@ const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({ eventId, isVirtua
       generateAttendanceCode();
     }
     initializeManualAttendance();
-  }, [attendees]);
+  }, [attendees, isVirtual]);
 
   const initializeManualAttendance = () => {
-    const initial = {};
+    const initial: Record<string, boolean> = {};
     attendees.forEach(attendee => {
       initial[attendee.id] = false;
     });
@@ -42,7 +42,7 @@ const AttendanceTracker: React.FC<AttendanceTrackerProps> = ({ eventId, isVirtua
     setAttendanceCode(code);
   };
 
-  const handleManualAttendance = (attendeeId) => {
+  const handleManualAttendance = (attendeeId: string) => {
     setManualAttendance(prev => ({
       ...prev,
       [attendeeId]: !prev[attendeeId]
