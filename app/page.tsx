@@ -9,7 +9,7 @@ import { statuses } from "./table/utils/constants";
 
 
 import { Input } from "@/components/ui/input";
-import { Send, LightbulbIcon } from "lucide-react";
+import { Send, LightbulbIcon, Smile } from "lucide-react";
 import { MessageModal } from "@/components/MessageModal";
 import ComboboxPopover from './table/components/ComboboxPopover';
 import AddPersonForm from './table/components/AddPersonForm';
@@ -37,7 +37,7 @@ export default function DataTable() {
 
   const handleSendMessage = useCallback((message: string) => {
     if (selectedPerson) {
-      axios.post('http://localhost:3001/api/send-message', {
+      axios.post('/api/send-message', {
         recipientId: selectedPerson.id,
         message
       })
@@ -81,7 +81,7 @@ export default function DataTable() {
 
   useEffect(() => {
     // Fetch initial data from the server
-    axios.get('http://localhost:3001/api/data')
+    axios.get('/api/data')
       .then(response => {
         setData(response.data);
         setFilteredData(response.data);
@@ -90,7 +90,7 @@ export default function DataTable() {
   }, []);
 
   const handleAddPerson = useCallback((newPerson: Omit<typeof data[0], 'id'>) => {
-    axios.post('http://localhost:3001/api/data', newPerson)
+    axios.post('/api/data', newPerson)
       .then(response => {
         const addedPerson = response.data;
         setData(prevData => [...prevData, addedPerson]);
