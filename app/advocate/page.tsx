@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -10,8 +10,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
+interface Mom {
+  name: string;
+  program: string;
+  progress: number;
+  nextSession: string;
+  image: string;
+}
+
+const formatDate = (dateString: string) => {
+  const options: Intl.DateTimeFormatOptions = { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+  return new Date(dateString).toLocaleDateString('en-US', options);
+};
+
 const AdvocateDashboard = () => {
-  const [mom] = useState({
+  const [mom] = useState<Mom>({
     name: "Sarah Johnson",
     program: "Parenting",
     progress: 60,
@@ -20,25 +33,19 @@ const AdvocateDashboard = () => {
   });
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [contactMethod, setContactMethod] = useState('');
-  const [contactNotes, setContactNotes] = useState('');
+  const [contactMethod, setContactMethod] = useState<string>('');
+  const [contactNotes, setContactNotes] = useState<string>('');
 
-  const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
-  };
-
-  const handleLogContact = () => {
+  const handleLogContact = useCallback(() => {
     setIsDrawerOpen(true);
-  };
+  }, []);
 
-  const handleSaveContact = () => {
-    // Here you would typically save the contact log to your backend
+  const handleSaveContact = useCallback(() => {
     console.log('Saving contact log:', { contactMethod, contactNotes });
     setIsDrawerOpen(false);
     setContactMethod('');
     setContactNotes('');
-  };
+  }, [contactMethod, contactNotes]);
 
   return (
     <div className="p-4 max-w-md mx-auto">
@@ -96,13 +103,13 @@ const AdvocateDashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="flex justify-around">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" aria-label="Phone call">
               <PhoneCall className="h-6 w-6" />
             </Button>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" aria-label="Video call">
               <VideoIcon className="h-6 w-6" />
             </Button>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" aria-label="Send email">
               <Mail className="h-6 w-6" />
             </Button>
           </div>
