@@ -23,8 +23,8 @@ const AdvocateDashboard = () => {
   const [contactMethod, setContactMethod] = useState('');
   const [contactNotes, setContactNotes] = useState('');
 
-  const formatDate = (dateString) => {
-    const options = { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+  const formatDate = (dateString: string) => {
+    const options: Intl.DateTimeFormatOptions = { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
     return new Date(dateString).toLocaleDateString('en-US', options);
   };
 
