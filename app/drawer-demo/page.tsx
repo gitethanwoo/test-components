@@ -156,7 +156,7 @@ const Dashboard = () => {
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Left side navigation */}
-      <nav className="w-64 bg-white shadow-md flex flex-col justify-between">
+      <nav className="w-64 bg-white shadow-md flex flex-col">
         <div className="p-4">
           <h1 className="text-2xl font-bold text-gray-800">EMA Dashboard</h1>
         </div>
