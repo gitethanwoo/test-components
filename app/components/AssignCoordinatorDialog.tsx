@@ -10,7 +10,11 @@ interface AssignCoordinatorDialogProps {
   onAssign: (coordinator: string, location: string) => void;
 }
 
-const coordinators = {
+type CoordinatorMap = {
+  [key: string]: string[];
+};
+
+const coordinators: CoordinatorMap = {
   "Virtual": ["Mark Johnson", "Mike Brown"],
   "New York Office": ["Jane Smith", "Emma Davis"],
   "Los Angeles Office": ["John Doe", "Alice Wilson"],
@@ -84,7 +88,7 @@ const AssignCoordinatorDialog: React.FC<AssignCoordinatorDialogProps> = ({ isOpe
                 <CommandList>
                   <CommandEmpty>No coordinator found.</CommandEmpty>
                   <CommandGroup>
-                    {selectedLocation && coordinators[selectedLocation].map((coordinator) => (
+                    {selectedLocation && coordinators[selectedLocation as keyof CoordinatorMap].map((coordinator) => (
                       <CommandItem
                         key={coordinator}
                         onSelect={(value) => {
