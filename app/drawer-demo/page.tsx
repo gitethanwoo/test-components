@@ -16,6 +16,7 @@ import NotificationModal from '../components/NotificationModal';
 import IntakeDialog from '../components/IntakeDialog';
 import ReferOutDialog from '../components/ReferOutDialog';
 import { Report, Notification, MomAwaitingIntake } from '../types';
+import { Switch } from "@/components/ui/switch";
 
 const Dashboard = () => {
   const fakeReports: Report[] = [
@@ -67,6 +68,7 @@ const Dashboard = () => {
   const [modalButtonLabel, setModalButtonLabel] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [reports, setReports] = useState<Report[]>(fakeReports);
+  const [isSupervisorView, setIsSupervisorView] = useState(false);
 
   const momsAwaitingIntake: MomAwaitingIntake[] = [
     {
@@ -154,7 +156,7 @@ const Dashboard = () => {
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Left side navigation */}
-      <nav className="w-64 bg-white shadow-md">
+      <nav className="w-64 bg-white shadow-md flex flex-col justify-between">
         <div className="p-4">
           <h1 className="text-2xl font-bold text-gray-800">EMA Dashboard</h1>
         </div>
@@ -182,6 +184,16 @@ const Dashboard = () => {
             </li>
           ))}
         </ul>
+        <div className="p-4 flex items-center">
+          <Switch
+            checked={isSupervisorView}
+            onCheckedChange={setIsSupervisorView}
+            id="supervisor-mode"
+          />
+          <label htmlFor="supervisor-mode" className="ml-2 text-sm text-gray-600">
+            Supervisor View
+          </label>
+        </div>
       </nav>
 
       {/* Main content */}
@@ -266,6 +278,7 @@ const Dashboard = () => {
         selectedMom={selectedMom}
         onStartIntake={() => setIsIntakeDialogOpen(true)}
         onReferOut={() => setIsReferOutDialogOpen(true)}
+        isSupervisorView={isSupervisorView}
       />
 
       <NotificationModal 

@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MomAwaitingIntake } from '../types';
+import AssignCoordinatorDialog from './AssignCoordinatorDialog';
 
 interface MomIntakeDrawerProps {
   isOpen: boolean;
@@ -10,10 +11,18 @@ interface MomIntakeDrawerProps {
   selectedMom: MomAwaitingIntake | null;
   onStartIntake: () => void;
   onReferOut: () => void;
+  isSupervisorView: boolean;
 }
 
-const MomIntakeDrawer: React.FC<MomIntakeDrawerProps> = ({ isOpen, onOpenChange, selectedMom, onStartIntake, onReferOut }) => {
+const MomIntakeDrawer: React.FC<MomIntakeDrawerProps> = ({ isOpen, onOpenChange, selectedMom, onStartIntake, onReferOut, isSupervisorView }) => {
   if (!selectedMom) return null;
+
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
+
+  const handleAssignCoordinator = (coordinator: string, location: string) => {
+    // Implement the logic to assign the coordinator
+    console.log(`Assigned to ${coordinator} at ${location}`);
+  };
 
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange} direction='right'>
@@ -84,9 +93,19 @@ const MomIntakeDrawer: React.FC<MomIntakeDrawerProps> = ({ isOpen, onOpenChange,
           <div className="flex justify-between w-full">
             <Button onClick={onStartIntake}>Start Intake</Button>
             <Button onClick={onReferOut} variant="outline">Refer Out</Button>
+            {isSupervisorView && (
+              <Button onClick={() => setIsAssignDialogOpen(true)} variant="secondary">
+                Assign to Coordinator
+              </Button>
+            )}
           </div>
         </DrawerFooter>
       </DrawerContent>
+      <AssignCoordinatorDialog
+        isOpen={isAssignDialogOpen}
+        onOpenChange={setIsAssignDialogOpen}
+        onAssign={handleAssignCoordinator}
+      />
     </Drawer>
   );
 };
