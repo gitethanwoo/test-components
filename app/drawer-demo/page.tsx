@@ -17,6 +17,8 @@ import IntakeDialog from '../components/IntakeDialog';
 import ReferOutDialog from '../components/ReferOutDialog';
 import { Report, Notification, MomAwaitingIntake } from '../types';
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 const Dashboard = () => {
   const fakeReports: Report[] = [
@@ -63,10 +65,10 @@ const Dashboard = () => {
   const [isReferOutDialogOpen, setIsReferOutDialogOpen] = useState(false);
   const [referralReason, setReferralReason] = useState('');
   const [selectedAgency, setSelectedAgency] = useState('');
-  const [modalTitle, setModalTitle] = useState('');
-  const [modalInputLabel, setModalInputLabel] = useState('');
-  const [modalButtonLabel, setModalButtonLabel] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [dialogTitle, setDialogTitle] = useState('');
+  const [dialogInputLabel, setDialogInputLabel] = useState('');
+  const [dialogButtonLabel, setDialogButtonLabel] = useState('');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [reports, setReports] = useState<Report[]>(fakeReports);
   const [isSupervisorView, setIsSupervisorView] = useState(false);
 
@@ -102,10 +104,10 @@ const Dashboard = () => {
   };
 
   const handlePlusClick = (item: string) => {
-    setModalTitle(`Create New ${item.slice(0, -1)}`);
-    setModalInputLabel(`${item.slice(0, -1)} Title`);
-    setModalButtonLabel(`Create ${item.slice(0, -1)}`);
-    setIsModalOpen(true);
+    setDialogTitle(`Create New ${item.slice(0, -1)}`);
+    setDialogInputLabel(`${item.slice(0, -1)} Title`);
+    setDialogButtonLabel(`Create ${item.slice(0, -1)}`);
+    setIsDialogOpen(true);
   };
 
   const handleNotificationClick = (notification: Notification) => {
@@ -300,6 +302,25 @@ const Dashboard = () => {
         onOpenChange={setIsReferOutDialogOpen}
         onSendReferral={handleSendReferral}
       />
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{dialogTitle}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="name" className="text-right">
+                {dialogInputLabel}
+              </Label>
+              <Input id="name" className="col-span-3" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="submit">{dialogButtonLabel}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
