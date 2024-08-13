@@ -8,13 +8,14 @@ interface SessionReportDrawerProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   selectedReport: Report | null;
+  onMarkAsReviewed: (reportId: number) => void;
 }
 
-const SessionReportDrawer: React.FC<SessionReportDrawerProps> = ({ isOpen, onOpenChange, selectedReport }) => {
+const SessionReportDrawer: React.FC<SessionReportDrawerProps> = ({ isOpen, onOpenChange, selectedReport, onMarkAsReviewed }) => {
   if (!selectedReport) return null;
 
   return (
-    <Drawer open={isOpen} onOpenChange={onOpenChange}>
+    <Drawer open={isOpen} onOpenChange={onOpenChange} direction="right">
       <DrawerContent className='h-screen top-0 right-0 left-auto mt-0 w-[500px] rounded-none'>
         <DrawerHeader>
           <DrawerTitle>Session Report</DrawerTitle>
@@ -70,7 +71,10 @@ const SessionReportDrawer: React.FC<SessionReportDrawerProps> = ({ isOpen, onOpe
             </div>
           </div>
         </ScrollArea>
-        <DrawerFooter>
+        <DrawerFooter className="flex justify-between">
+          <Button onClick={() => onMarkAsReviewed(selectedReport.id)} variant="default">
+            Mark as Reviewed
+          </Button>
           <DrawerClose asChild>
             <Button variant="outline">Close</Button>
           </DrawerClose>

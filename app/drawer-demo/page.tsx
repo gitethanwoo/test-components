@@ -18,24 +18,6 @@ import ReferOutDialog from '../components/ReferOutDialog';
 import { Report, Notification, MomAwaitingIntake } from '../types';
 
 const Dashboard = () => {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
-  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([
-    { id: 1, client: "Crystal Reyes", need: "Housing renovation needed urgently", isRead: false },
-    { id: 2, client: "Jane Doe", need: "Immediate financial assistance required", isRead: false },
-  ]);
-  const [isMomDrawerOpen, setIsMomDrawerOpen] = useState(false);
-  const [selectedMom, setSelectedMom] = useState<MomAwaitingIntake | null>(null);
-  const [isIntakeDialogOpen, setIsIntakeDialogOpen] = useState(false);
-  const [isReferOutDialogOpen, setIsReferOutDialogOpen] = useState(false);
-  const [referralReason, setReferralReason] = useState('');
-  const [selectedAgency, setSelectedAgency] = useState('');
-  const [modalTitle, setModalTitle] = useState('');
-  const [modalInputLabel, setModalInputLabel] = useState('');
-  const [modalButtonLabel, setModalButtonLabel] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
   const fakeReports: Report[] = [
     {
       id: 1,
@@ -66,6 +48,25 @@ const Dashboard = () => {
       nextSessionDate: "",
     },
   ];
+
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([
+    { id: 1, client: "Crystal Reyes", need: "Housing renovation needed urgently", isRead: false },
+    { id: 2, client: "Jane Doe", need: "Immediate financial assistance required", isRead: false },
+  ]);
+  const [isMomDrawerOpen, setIsMomDrawerOpen] = useState(false);
+  const [selectedMom, setSelectedMom] = useState<MomAwaitingIntake | null>(null);
+  const [isIntakeDialogOpen, setIsIntakeDialogOpen] = useState(false);
+  const [isReferOutDialogOpen, setIsReferOutDialogOpen] = useState(false);
+  const [referralReason, setReferralReason] = useState('');
+  const [selectedAgency, setSelectedAgency] = useState('');
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalInputLabel, setModalInputLabel] = useState('');
+  const [modalButtonLabel, setModalButtonLabel] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [reports, setReports] = useState<Report[]>(fakeReports);
 
   const momsAwaitingIntake: MomAwaitingIntake[] = [
     {
@@ -145,6 +146,11 @@ const Dashboard = () => {
     setSelectedAgency('');
   };
 
+  const handleMarkAsReviewed = (reportId: number) => {
+    setReports(reports.filter(report => report.id !== reportId));
+    setIsDrawerOpen(false);
+  };
+
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Left side navigation */}
@@ -205,7 +211,7 @@ const Dashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {fakeReports.map((report) => (
+              {reports.map((report) => (
                 <tr key={report.id}>
                   <td>{report.client}</td>
                   <td>{report.advocate}</td>
@@ -251,6 +257,7 @@ const Dashboard = () => {
         isOpen={isDrawerOpen}
         onOpenChange={setIsDrawerOpen}
         selectedReport={selectedReport}
+        onMarkAsReviewed={handleMarkAsReviewed}
       />
 
       <MomIntakeDrawer 

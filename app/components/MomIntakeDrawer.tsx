@@ -16,7 +16,7 @@ const MomIntakeDrawer: React.FC<MomIntakeDrawerProps> = ({ isOpen, onOpenChange,
   if (!selectedMom) return null;
 
   return (
-    <Drawer open={isOpen} onOpenChange={onOpenChange}>
+    <Drawer open={isOpen} onOpenChange={onOpenChange} direction='right'>
       <DrawerContent className='h-screen top-0 right-0 left-auto mt-0 w-[500px] rounded-none'>
         <DrawerHeader>
           <DrawerTitle>Mom Intake Information</DrawerTitle>
