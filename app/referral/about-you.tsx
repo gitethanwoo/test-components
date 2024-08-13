@@ -1,6 +1,7 @@
 'use client'
 
 import { FormSection } from "@/components/FormSection"
+import { Field } from "@/components/FormSection";
 
 interface AboutYouProps {
   onPrevious: () => void;
@@ -8,7 +9,7 @@ interface AboutYouProps {
 }
 
 export default function AboutYou({ onPrevious, onContinue }: AboutYouProps) {
-  const aboutYouFields = [
+  const aboutYouFields: Field[] = [
     { name: 'housingStatus', label: 'Housing Status', type: 'select', placeholder: 'Select housing status', 
       options: [
         { value: 'status1', label: 'Status 1' },
@@ -55,7 +56,7 @@ export default function AboutYou({ onPrevious, onContinue }: AboutYouProps) {
       ]
     },
     { name: 'otherNeeds', label: 'Please describe any other needs or crises.', type: 'textarea', placeholder: 'Describe here' },
-  ]
+  ] as const;
 
   return (
     <FormSection 

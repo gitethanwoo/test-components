@@ -1,6 +1,7 @@
 'use client'
 
 import { FormSection } from "@/components/FormSection"
+import { Field } from "@/components/FormSection";
 
 interface AddressProps {
   onPrevious: () => void;
@@ -8,7 +9,7 @@ interface AddressProps {
 }
 
 export default function Address({ onPrevious, onContinue }: AddressProps) {
-  const addressFields = [
+  const addressFields: Field[] = [
     { name: 'street', label: 'Street Address', type: 'text', placeholder: '123 Main St' },
     { name: 'city', label: 'City', type: 'text', placeholder: 'Anytown' },
     { name: 'state', label: 'State', type: 'text', placeholder: 'CA' },
