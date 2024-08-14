@@ -5,8 +5,8 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
+import { RadioGroup } from "@/components/ui/radio-group";
+import { cn } from "@/lib/utils";
 
 const CustomRadioGroup = ({ options, value, onChange, name }: {
   options: string[];
@@ -20,19 +20,22 @@ const CustomRadioGroup = ({ options, value, onChange, name }: {
     className="flex space-x-2"
   >
     {options.map((option) => (
-      <div key={`${name}-${option.toLowerCase()}`}>
-        <RadioGroupItem
-          value={option.toLowerCase()}
-          id={`${name}-${option.toLowerCase()}`}
-          className="peer sr-only"
-        />
-        <Label
-          htmlFor={`${name}-${option.toLowerCase()}`}
-          className="flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md border-2 border-muted bg-popover hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary peer-data-[state=checked]:text-primary-foreground"
-        >
-          {option}
-        </Label>
-      </div>
+      <Button
+        key={`${name}-${option.toLowerCase()}`}
+        onClick={() => onChange(option.toLowerCase())}
+        type="button"
+        variant="outline"
+        className={cn(
+          "px-3 py-2 text-sm font-medium rounded-md border-2",
+          "hover:bg-slate-100 hover:text-accent-foreground",
+          "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+          value === option.toLowerCase()
+            ? "border-primary bg-primary text-primary-foreground"
+            : "border-muted bg-popover"
+        )}
+      >
+        {option}
+      </Button>
     ))}
   </RadioGroup>
 );
