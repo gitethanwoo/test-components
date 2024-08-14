@@ -6,10 +6,10 @@ import { CustomRadioGroup } from "@/components/CustomRadioGroup";
 
 interface IntakeMethodProps {
   onPrevious: () => void;
-  onContinue: () => void;
+  onSubmit: () => void; // Changed from onContinue to onSubmit
 }
 
-export default function IntakeMethod({ onPrevious, onContinue }: IntakeMethodProps) {
+export default function IntakeMethod({ onPrevious, onSubmit }: IntakeMethodProps) {
   const intakeMethodFields: Field[] = [
     { 
       name: 'hearAboutUs', 
@@ -38,7 +38,7 @@ export default function IntakeMethod({ onPrevious, onContinue }: IntakeMethodPro
       title="Intake Method" 
       fields={intakeMethodFields} 
       onPrevious={onPrevious}
-      onContinue={onContinue}
+      onContinue={onSubmit} // Use onSubmit here
       continueButtonText="Submit"
     />
   )

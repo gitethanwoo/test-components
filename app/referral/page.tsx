@@ -6,9 +6,11 @@ import MomInformation from './mom-information'
 import Address from './address'
 import AboutYou from './about-you'
 import IntakeMethod from './intake-method'
+import { useRouter } from 'next/navigation'
 
 export default function Component() {
   const [step, setStep] = useState(0)
+  const router = useRouter()
 
   const getProgress = () => {
     switch (step) {
@@ -25,6 +27,14 @@ export default function Component() {
     }
   }
 
+  const handleSubmit = () => {
+    // Here you would typically handle the form submission,
+    // e.g., sending data to an API
+    
+    // After submission, redirect to the success page
+    router.push('/referral/success')
+  }
+
   const renderFormSection = () => {
     switch (step) {
       case 0:
@@ -34,7 +44,7 @@ export default function Component() {
       case 2:
         return <AboutYou onPrevious={() => setStep(1)} onContinue={() => setStep(3)} />
       case 3:
-        return <IntakeMethod onPrevious={() => setStep(2)} onContinue={() => setStep(4)} />
+        return <IntakeMethod onPrevious={() => setStep(2)} onSubmit={handleSubmit} />
       default:
         return <MomInformation onContinue={() => setStep(1)} />
     }
