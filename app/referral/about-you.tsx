@@ -2,6 +2,7 @@
 
 import { FormSection } from "@/components/FormSection"
 import { Field } from "@/components/FormSection";
+import { CustomRadioGroup } from "@/components/CustomRadioGroup";
 
 interface AboutYouProps {
   onPrevious: () => void;
@@ -17,11 +18,12 @@ export default function AboutYou({ onPrevious, onContinue }: AboutYouProps) {
         // Add more statuses as needed
       ]
     },
-    { name: 'pregnant', label: 'Are you currently pregnant?', type: 'radio', options: [
-        { value: 'yes', label: 'Yes' },
-        { value: 'no', label: 'No' },
-        { value: 'unknown', label: 'Unknown' },
-      ]
+    { 
+      name: 'pregnant', 
+      label: 'Are you currently pregnant?', 
+      type: 'custom',
+      component: CustomRadioGroup,
+      options: ['Yes', 'No', 'Unknown']
     },
     { name: 'employmentStatus', label: 'Employment Status', type: 'select', placeholder: 'Select employment status', 
       options: [

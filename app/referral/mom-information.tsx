@@ -12,7 +12,7 @@ export default function MomInformation({ onContinue }: MomInformationProps) {
     { name: 'name', label: 'Mom Name', type: 'text', placeholder: 'Enter mom\'s name' },
     { name: 'email', label: 'Email', type: 'email', placeholder: 'example@gmail.com' },
     { name: 'phone', label: 'Phone Number', type: 'tel', placeholder: '999-999-9999' },
-    { name: 'dob', label: 'Date of Birth', type: 'date', placeholder: '06/06/1996' },
+    { name: 'dob', label: 'Date of Birth', type: 'date', placeholder: 'Select date' },
   ]
 
   return (

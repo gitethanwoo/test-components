@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress"
 import MomInformation from './mom-information'
 import Address from './address'
 import AboutYou from './about-you'
+import IntakeMethod from './intake-method'
 
 export default function Component() {
   const [step, setStep] = useState(0)
@@ -17,7 +18,8 @@ export default function Component() {
         return 40
       case 2:
         return 60
-      // Add more cases for other steps
+      case 3:
+        return 80
       default:
         return 0
     }
@@ -31,7 +33,8 @@ export default function Component() {
         return <Address onPrevious={() => setStep(0)} onContinue={() => setStep(2)} />
       case 2:
         return <AboutYou onPrevious={() => setStep(1)} onContinue={() => setStep(3)} />
-      // Add more cases for other steps
+      case 3:
+        return <IntakeMethod onPrevious={() => setStep(2)} onContinue={() => setStep(4)} />
       default:
         return <MomInformation onContinue={() => setStep(1)} />
     }
@@ -56,8 +59,7 @@ export default function Component() {
               <li className={step === 0 ? "font-bold text-primary" : ""}>Your Information</li>
               <li className={step === 1 ? "font-bold text-primary" : ""}>Your Address</li>
               <li className={step === 2 ? "font-bold text-primary" : ""}>About You</li>
-              <li>Mom Information (Continued)</li>
-              <li>Intake Details and Signature</li>
+              <li className={step === 3 ? "font-bold text-primary" : ""}>Intake Method</li>
             </ul>
           </nav>
           <div className="w-full md:w-[684px]">
