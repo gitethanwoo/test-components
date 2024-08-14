@@ -14,7 +14,7 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         inputs: { mom_info: momInfo },
-        version: "^1.1"
+        version: "^1.2"
       })
     });
 

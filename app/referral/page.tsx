@@ -51,16 +51,9 @@ export default function Component() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f9f6f1] p-4 md:p-8 flex flex-col">
+    <div className="min-h-screen p-4 md:p-8 flex flex-col">
       <div className="max-w-[964px] w-full mx-auto">
         <header className="flex flex-col items-left mb-8">
-          <img
-            src="/assets/ema-logo.svg"
-            alt="EMA Logo"
-            className="mb-4"
-            width="130"
-            height="40"
-          />
           <h1 className="text-3xl font-bold">Self Referral Form</h1>
         </header>
         <div className="flex flex-col md:flex-row md:space-x-8">
