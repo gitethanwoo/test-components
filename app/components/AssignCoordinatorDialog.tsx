@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChevronDown, X } from 'lucide-react';
+import { toast } from "sonner";
 
 import {
   ChartConfig,
@@ -39,7 +40,7 @@ interface Coordinator {
 interface AssignCoordinatorDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onAssign: (coordinatorName: string) => void;
+  onAssign: (coordinatorName: string, undoAction?: () => void) => void;
   coordinators?: Coordinator[];
   currentCoordinator: string | null;
 }
@@ -80,12 +81,11 @@ const AssignCoordinatorDialog: React.FC<AssignCoordinatorDialogProps> = ({ isOpe
     }
   };
 
-  const chartData = useMemo(() => coordinators.map(coordinator => ({
+  const chartData = useMemo(() => coordinators.slice(0, 5).map(coordinator => ({
     name: coordinator.name,
     totalWorkload: Object.values(coordinator.workload).reduce((a, b) => a + b, 0),
     workload: coordinator.workload
   })), [coordinators]);
-
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -94,15 +94,16 @@ const AssignCoordinatorDialog: React.FC<AssignCoordinatorDialogProps> = ({ isOpe
           <DialogTitle>{currentCoordinator ? "Edit Assigned Coordinator" : "Assign to Coordinator"}</DialogTitle>
         </DialogHeader>
         <div className="flex-grow overflow-y-auto">
-          <h3 className="text-sm font-medium text-center sm:text-left">Coordinator Workload</h3>
-          <ChartContainer config={chartConfig} className="w-full min-h-[320px] overflow-visible">
+          <h3 className="text-sm font-medium text-center sm:text-left">Top 5 Coordinators Workload</h3>
+          <ChartContainer config={chartConfig} className="w-full min-h-[320px] overflow-scroll">
             <BarChart
               data={chartData}
               layout="vertical"
-              margin={{ top: 10, right: 0, bottom: 10, left: 0 }}
-              barSize={40}
+              margin={{ top: 10, right: 30, bottom: 10, left: 0 }} // Increased left margin
+              barSize={40} // Reduced bar size
               barGap={4}
               width={400}
+              height={200} // Fixed height for 5 coordinators
             >
               <CartesianGrid horizontal={false} />
               <YAxis
@@ -111,7 +112,7 @@ const AssignCoordinatorDialog: React.FC<AssignCoordinatorDialogProps> = ({ isOpe
                 tickLine={false}
                 tickMargin={10}
                 axisLine={false}
-                hide
+                width={140} // Increased width for names
               />
               <XAxis type="number" hide />
               <Bar
@@ -129,13 +130,6 @@ const AssignCoordinatorDialog: React.FC<AssignCoordinatorDialogProps> = ({ isOpe
                     fill={hoveredBar === entry.name ? chartConfig.totalWorkload.hoverColor : chartConfig.totalWorkload.color}
                   />
                 ))}
-                <LabelList
-                  dataKey="name"
-                  position="insideLeft"
-                  offset={8}
-                  fill={chartConfig.label.color}
-                  fontSize={12}
-                />
                 <LabelList
                   dataKey="totalWorkload"
                   position="right"

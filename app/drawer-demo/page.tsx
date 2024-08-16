@@ -16,6 +16,7 @@ import { Report, Notification, MomAwaitingIntake } from '../types';
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Toaster } from "@/components/ui/sonner"
 
 const Dashboard = () => {
   const fakeReports: Report[] = [
@@ -142,6 +143,17 @@ const Dashboard = () => {
         waitingForPostAssessment: 2,
       },
     },
+    {
+      name: "John Doe",
+      workload: {
+        prospectiveMoms: 6,
+        waitingForPreAssessment: 5,
+        inGroupClass: 9,
+        waitingToBePaired: 4,
+        inProgram: 16,
+        waitingForPostAssessment: 6,
+      },
+    },
   ];
 
   const handleReviewClick = (report: Report) => {
@@ -203,8 +215,6 @@ const Dashboard = () => {
 
   const handleCoordinatorAssigned = (coordinatorName: string) => {
     setAssignedCoordinator(coordinatorName);
-    console.log(`Assigned to coordinator: ${coordinatorName}`);
-    // Here you would typically make an API call to update the assignment
   };
 
   return (
@@ -385,6 +395,8 @@ const Dashboard = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Toaster />
     </div>
   )
 }

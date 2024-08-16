@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MomAwaitingIntake } from '../types';
 import AssignCoordinatorDialog from './AssignCoordinatorDialog';
-import { Pencil } from 'lucide-react'; // Import the Pencil icon
+import { Pencil, Check } from 'lucide-react';
+import { motion, AnimatePresence } from "framer-motion";
 
 interface MomIntakeDrawerProps {
   isOpen: boolean;
@@ -34,10 +35,15 @@ const MomIntakeDrawer: React.FC<MomIntakeDrawerProps> = ({
   if (!selectedMom) return null;
 
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
 
   const handleAssignCoordinator = (coordinatorName: string) => {
     onCoordinatorAssigned(coordinatorName);
     setIsAssignDialogOpen(false);
+    setShowFeedback(true);
+
+    // Hide the feedback after 3 seconds
+    setTimeout(() => setShowFeedback(false), 3000);
   };
 
   return (
@@ -50,17 +56,32 @@ const MomIntakeDrawer: React.FC<MomIntakeDrawerProps> = ({
         <ScrollArea className="h-[calc(100vh-200px)] p-4">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-semibold">Assigned Coordinator</h3>
-                <p>{assignedCoordinator || 'Not assigned'}</p>
+              <div className="flex items-center">
+                <div>
+                  <h3 className="font-semibold">Assigned Coordinator</h3>
+                  <p>{assignedCoordinator || 'Not assigned'}</p>
+                </div>
+                <AnimatePresence>
+                  {showFeedback && (
+                    <motion.span
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                      className="ml-2 text-green-600 flex items-center"
+                    >
+                      <Check className="w-4 h-4 mr-1" />
+                      Assigned
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </div>
               <Button
-                variant="secondary"
-                size="sm"
+                variant="ghost"
+                size="icon"
                 onClick={() => setIsAssignDialogOpen(true)}
                 title={assignedCoordinator ? "Edit assigned coordinator" : "Assign coordinator"}
               >
-                <Pencil className="h-4 w-4 mr-2" />{assignedCoordinator ? 'Edit' : 'Assign'} 
+                <Pencil className="h-4 w-4" />
               </Button>
             </div>
             <div>
