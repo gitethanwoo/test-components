@@ -1,117 +1,213 @@
-import React, { useState } from 'react';
+"use client"
+
+import React, { useState, useMemo } from 'react';
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis, Cell } from "recharts"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { motion, AnimatePresence } from "framer-motion"
+import { ChevronDown, X } from 'lucide-react';
+
+import {
+  ChartConfig,
+  ChartContainer,
+} from "@/components/ui/chart"
+
+type ExtendedChartConfig = ChartConfig & {
+  totalWorkload?: {
+    label?: string;
+    color?: string;
+    hoverColor?: string;
+  };
+  label?: {
+    color?: string;
+  };
+};
+
+interface Coordinator {
+  name: string;
+  workload: {
+    prospectiveMoms: number;
+    waitingForPreAssessment: number;
+    inGroupClass: number;
+    waitingToBePaired: number;
+    inProgram: number;
+    waitingForPostAssessment: number;
+  };
+}
 
 interface AssignCoordinatorDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onAssign: (coordinator: string, location: string) => void;
+  onAssign: (coordinatorName: string) => void;
+  coordinators?: Coordinator[];
+  currentCoordinator: string | null;
 }
 
-type CoordinatorMap = {
-  [key: string]: string[];
-};
+const workloadCategories = [
+  { key: "prospectiveMoms", label: "Prospective Moms" },
+  { key: "waitingForPreAssessment", label: "Waiting for Pre-Assessment" },
+  { key: "waitingToBePaired", label: "Waiting to be Paired" },
+  { key: "inGroupClass", label: "In Group Class" },
+  { key: "inProgram", label: "In Program" },
+  { key: "waitingForPostAssessment", label: "Waiting for Post-Assessment" },
+] as const;
 
-const coordinators: CoordinatorMap = {
-  "Virtual": ["Mark Johnson", "Mike Brown"],
-  "New York Office": ["Jane Smith", "Emma Davis"],
-  "Los Angeles Office": ["John Doe", "Alice Wilson"],
-  "Chicago Office": ["Bob Williams", "Charlie Lee"],
-  "Houston Office": ["David Kim", "Eva Martin"],
-};
+const chartConfig = {
+  totalWorkload: {
+    label: "Total Workload",
+    color: "hsl(30, 100%, 90%)", // Light orange
+    hoverColor: "hsl(30, 100%, 80%)", // Lighter orange
+  },
+  label: {
+    color: "hsl(0, 0%, 7%)", // Dark 121212
+  },
+} as const;
 
-const locations = Object.keys(coordinators);
+const AssignCoordinatorDialog: React.FC<AssignCoordinatorDialogProps> = ({ isOpen, onOpenChange, onAssign, coordinators = [], currentCoordinator }) => {
+  const [selectedCoordinator, setSelectedCoordinator] = useState<string>(currentCoordinator || "");
+  const [expandedCoordinator, setExpandedCoordinator] = useState<string | null>(null);
+  const [hoveredBar, setHoveredBar] = useState<string | null>(null);
 
-const AssignCoordinatorDialog: React.FC<AssignCoordinatorDialogProps> = ({ isOpen, onOpenChange, onAssign }) => {
-  const [selectedLocation, setSelectedLocation] = useState("");
-  const [selectedCoordinator, setSelectedCoordinator] = useState("");
-  const [locationOpen, setLocationOpen] = useState(false);
-  const [coordinatorOpen, setCoordinatorOpen] = useState(false);
-
-  const handleLocationSelect = (value: string) => {
-    setSelectedLocation(value);
-    setSelectedCoordinator(""); // Clear the selected coordinator
-    setLocationOpen(false);
+  const handleBarClick = (data: any) => {
+    setExpandedCoordinator(expandedCoordinator === data.name ? null : data.name);
   };
 
   const handleAssign = () => {
-    if (selectedCoordinator && selectedLocation) {
-      onAssign(selectedCoordinator, selectedLocation);
+    if (selectedCoordinator) {
+      onAssign(selectedCoordinator);
       onOpenChange(false);
     }
   };
 
+  const chartData = useMemo(() => coordinators.map(coordinator => ({
+    name: coordinator.name,
+    totalWorkload: Object.values(coordinator.workload).reduce((a, b) => a + b, 0),
+    workload: coordinator.workload
+  })), [coordinators]);
+
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-xl max-h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Assign to Coordinator</DialogTitle>
+          <DialogTitle>{currentCoordinator ? "Edit Assigned Coordinator" : "Assign to Coordinator"}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          <Popover open={locationOpen} onOpenChange={setLocationOpen}>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full justify-start">
-                {selectedLocation || "Select a location"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="p-0" side="bottom" align="start">
-              <Command>
-                <CommandInput placeholder="Search location..." />
-                <CommandList>
-                  <CommandEmpty>No location found.</CommandEmpty>
-                  <CommandGroup>
-                    {locations.map((location) => (
-                      <CommandItem
-                        key={location}
-                        onSelect={handleLocationSelect}
-                      >
-                        {location}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-
-          <Popover open={coordinatorOpen} onOpenChange={setCoordinatorOpen}>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full justify-start" disabled={!selectedLocation}>
-                {selectedCoordinator || "Select a coordinator"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="p-0" side="bottom" align="start">
-              <Command>
-                <CommandInput placeholder="Search coordinator..." />
-                <CommandList>
-                  <CommandEmpty>No coordinator found.</CommandEmpty>
-                  <CommandGroup>
-                    {selectedLocation && coordinators[selectedLocation as keyof CoordinatorMap].map((coordinator) => (
-                      <CommandItem
-                        key={coordinator}
-                        onSelect={(value) => {
-                          setSelectedCoordinator(value);
-                          setCoordinatorOpen(false);
-                        }}
-                      >
-                        {coordinator}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+        <div className="flex-grow overflow-y-auto">
+          <h3 className="text-sm font-medium text-center sm:text-left">Coordinator Workload</h3>
+          <ChartContainer config={chartConfig} className="w-full min-h-[320px] overflow-visible">
+            <BarChart
+              data={chartData}
+              layout="vertical"
+              margin={{ top: 10, right: 0, bottom: 10, left: 0 }}
+              barSize={40}
+              barGap={4}
+              width={400}
+            >
+              <CartesianGrid horizontal={false} />
+              <YAxis
+                dataKey="name"
+                type="category"
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+                hide
+              />
+              <XAxis type="number" hide />
+              <Bar
+                dataKey="totalWorkload"
+                radius={[4, 4, 4, 4]}
+                onClick={handleBarClick}
+                onMouseEnter={(data) => setHoveredBar(data.name)}
+                onMouseLeave={() => setHoveredBar(null)}
+                isAnimationActive={false}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    cursor="pointer"
+                    fill={hoveredBar === entry.name ? chartConfig.totalWorkload.hoverColor : chartConfig.totalWorkload.color}
+                  />
+                ))}
+                <LabelList
+                  dataKey="name"
+                  position="insideLeft"
+                  offset={8}
+                  fill={chartConfig.label.color}
+                  fontSize={12}
+                />
+                <LabelList
+                  dataKey="totalWorkload"
+                  position="right"
+                  offset={8}
+                  className="fill-foreground"
+                  fontSize={12}
+                />
+              </Bar>
+            </BarChart>
+          </ChartContainer>
+          <AnimatePresence>
+            {expandedCoordinator && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <CoordinatorDetails
+                  coordinator={coordinators.find(c => c.name === expandedCoordinator)!}
+                  onClose={() => setExpandedCoordinator(null)}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
+        <Select onValueChange={setSelectedCoordinator} value={selectedCoordinator}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select a coordinator" />
+          </SelectTrigger>
+          <SelectContent>
+            {coordinators && coordinators.length > 0 ? (
+              coordinators.map((coordinator) => (
+                <SelectItem key={coordinator.name} value={coordinator.name}>
+                  {coordinator.name}
+                </SelectItem>
+              ))
+            ) : (
+              <SelectItem value="no_coordinators" disabled>No coordinators available</SelectItem>
+            )}
+          </SelectContent>
+        </Select>
         <DialogFooter>
-          <Button onClick={handleAssign} disabled={!selectedCoordinator || !selectedLocation}>
-            Assign
+          <Button onClick={handleAssign} disabled={!selectedCoordinator || selectedCoordinator === currentCoordinator}>
+            {currentCoordinator ? "Update Assignment" : "Assign"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+};
+
+const CoordinatorDetails: React.FC<{ coordinator: Coordinator; onClose: () => void }> = ({ coordinator, onClose }) => {
+  return (
+    <div className="mt-4 p-4 bg-secondary rounded-md overflow-hidden">
+      <div className="flex justify-between items-center mb-2">
+        <h4 className="font-bold text-lg">{coordinator.name}</h4>
+        <Button variant="ghost" size="sm" onClick={onClose}>
+          <X className="h-5 w-5" />
+        </Button>
+      </div>
+      {workloadCategories.map(({ key, label }) => (
+        <p key={key} className="text-sm flex justify-between py-1">
+          <span>{label}:</span>
+          <span className="font-medium">{coordinator.workload[key as keyof typeof coordinator.workload]}</span>
+        </p>
+      ))}
+      <p className="font-bold mt-2 flex justify-between">
+        <span>Total:</span>
+        <span>{Object.values(coordinator.workload).reduce((a, b) => a + b, 0)}</span>
+      </p>
+    </div>
   );
 };
 

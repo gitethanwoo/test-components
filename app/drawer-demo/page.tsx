@@ -11,6 +11,7 @@ import MomIntakeDrawer from '../components/MomIntakeDrawer';
 import NotificationModal from '../components/NotificationModal';
 import IntakeDialog from '../components/IntakeDialog';
 import ReferOutDialog from '../components/ReferOutDialog';
+import AssignCoordinatorDialog from '../components/AssignCoordinatorDialog';
 import { Report, Notification, MomAwaitingIntake } from '../types';
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input"
@@ -67,6 +68,8 @@ const Dashboard = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [reports, setReports] = useState<Report[]>(fakeReports);
   const [isSupervisorView, setIsSupervisorView] = useState(false);
+  const [isAssignCoordinatorDialogOpen, setIsAssignCoordinatorDialogOpen] = useState(false);
+  const [assignedCoordinator, setAssignedCoordinator] = useState<string | null>(null);
 
   const momsAwaitingIntake: MomAwaitingIntake[] = [
     {
@@ -92,6 +95,53 @@ const Dashboard = () => {
       other_needs_or_crises: "",
     },
     // Add more moms as needed
+  ];
+
+  const fakeCoordinators = [
+    {
+      name: "Emily Johnson",
+      workload: {
+        prospectiveMoms: 5,
+        waitingForPreAssessment: 3,
+        inGroupClass: 8,
+        waitingToBePaired: 2,
+        inProgram: 15,
+        waitingForPostAssessment: 4,
+      },
+    },
+    {
+      name: "Michael Chen",
+      workload: {
+        prospectiveMoms: 3,
+        waitingForPreAssessment: 2,
+        inGroupClass: 6,
+        waitingToBePaired: 1,
+        inProgram: 12,
+        waitingForPostAssessment: 3,
+      },
+    },
+    {
+      name: "Sarah Thompson",
+      workload: {
+        prospectiveMoms: 4,
+        waitingForPreAssessment: 4,
+        inGroupClass: 7,
+        waitingToBePaired: 3,
+        inProgram: 14,
+        waitingForPostAssessment: 5,
+      },
+    },
+    {
+      name: "David Rodriguez",
+      workload: {
+        prospectiveMoms: 2,
+        waitingForPreAssessment: 1,
+        inGroupClass: 5,
+        waitingToBePaired: 2,
+        inProgram: 10,
+        waitingForPostAssessment: 2,
+      },
+    },
   ];
 
   const handleReviewClick = (report: Report) => {
@@ -149,6 +199,12 @@ const Dashboard = () => {
   const handleMarkAsReviewed = (reportId: number) => {
     setReports(reports.filter(report => report.id !== reportId));
     setIsDrawerOpen(false);
+  };
+
+  const handleCoordinatorAssigned = (coordinatorName: string) => {
+    setAssignedCoordinator(coordinatorName);
+    console.log(`Assigned to coordinator: ${coordinatorName}`);
+    // Here you would typically make an API call to update the assignment
   };
 
   return (
@@ -276,7 +332,11 @@ const Dashboard = () => {
         selectedMom={selectedMom}
         onStartIntake={() => setIsIntakeDialogOpen(true)}
         onReferOut={() => setIsReferOutDialogOpen(true)}
+        onAssignCoordinator={() => setIsAssignCoordinatorDialogOpen(true)}
         isSupervisorView={isSupervisorView}
+        coordinators={fakeCoordinators}
+        assignedCoordinator={assignedCoordinator}
+        onCoordinatorAssigned={handleCoordinatorAssigned}
       />
 
       <NotificationModal 
@@ -297,6 +357,14 @@ const Dashboard = () => {
         isOpen={isReferOutDialogOpen}
         onOpenChange={setIsReferOutDialogOpen}
         onSendReferral={handleSendReferral}
+      />
+
+      <AssignCoordinatorDialog
+        isOpen={isAssignCoordinatorDialogOpen}
+        onOpenChange={setIsAssignCoordinatorDialogOpen}
+        onAssign={handleCoordinatorAssigned}
+        coordinators={fakeCoordinators}
+        currentCoordinator={assignedCoordinator}
       />
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

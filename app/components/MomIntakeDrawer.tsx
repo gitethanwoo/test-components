@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MomAwaitingIntake } from '../types';
 import AssignCoordinatorDialog from './AssignCoordinatorDialog';
+import { Pencil } from 'lucide-react'; // Import the Pencil icon
 
 interface MomIntakeDrawerProps {
   isOpen: boolean;
@@ -11,17 +12,32 @@ interface MomIntakeDrawerProps {
   selectedMom: MomAwaitingIntake | null;
   onStartIntake: () => void;
   onReferOut: () => void;
+  onAssignCoordinator: () => void;
   isSupervisorView: boolean;
+  coordinators: any[];
+  assignedCoordinator: string | null;
+  onCoordinatorAssigned: (coordinatorName: string) => void;
 }
 
-const MomIntakeDrawer: React.FC<MomIntakeDrawerProps> = ({ isOpen, onOpenChange, selectedMom, onStartIntake, onReferOut, isSupervisorView }) => {
+const MomIntakeDrawer: React.FC<MomIntakeDrawerProps> = ({ 
+  isOpen, 
+  onOpenChange, 
+  selectedMom, 
+  onStartIntake, 
+  onReferOut, 
+  onAssignCoordinator, 
+  isSupervisorView,
+  coordinators,
+  assignedCoordinator,
+  onCoordinatorAssigned
+}) => {
   if (!selectedMom) return null;
 
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
 
-  const handleAssignCoordinator = (coordinator: string, location: string) => {
-    // Implement the logic to assign the coordinator
-    console.log(`Assigned to ${coordinator} at ${location}`);
+  const handleAssignCoordinator = (coordinatorName: string) => {
+    onCoordinatorAssigned(coordinatorName);
+    setIsAssignDialogOpen(false);
   };
 
   return (
@@ -33,6 +49,20 @@ const MomIntakeDrawer: React.FC<MomIntakeDrawerProps> = ({ isOpen, onOpenChange,
         </DrawerHeader>
         <ScrollArea className="h-[calc(100vh-200px)] p-4">
           <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold">Assigned Coordinator</h3>
+                <p>{assignedCoordinator || 'Not assigned'}</p>
+              </div>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setIsAssignDialogOpen(true)}
+                title={assignedCoordinator ? "Edit assigned coordinator" : "Assign coordinator"}
+              >
+                <Pencil className="h-4 w-4 mr-2" />{assignedCoordinator ? 'Edit' : 'Assign'} 
+              </Button>
+            </div>
             <div>
               <h3 className="font-semibold">Name</h3>
               <p>{selectedMom.name}</p>
@@ -90,14 +120,9 @@ const MomIntakeDrawer: React.FC<MomIntakeDrawerProps> = ({ isOpen, onOpenChange,
           </div>
         </ScrollArea>
         <DrawerFooter>
-          <div className="flex justify-between w-full">
-            <Button onClick={onStartIntake}>Start Intake</Button>
+          <div className="flex justify-end w-full space-x-2">
             <Button onClick={onReferOut} variant="outline">Refer Out</Button>
-            {isSupervisorView && (
-              <Button onClick={() => setIsAssignDialogOpen(true)} variant="secondary">
-                Assign to Coordinator
-              </Button>
-            )}
+            <Button onClick={onStartIntake}>Start Intake</Button>
           </div>
         </DrawerFooter>
       </DrawerContent>
@@ -105,6 +130,8 @@ const MomIntakeDrawer: React.FC<MomIntakeDrawerProps> = ({ isOpen, onOpenChange,
         isOpen={isAssignDialogOpen}
         onOpenChange={setIsAssignDialogOpen}
         onAssign={handleAssignCoordinator}
+        coordinators={coordinators}
+        currentCoordinator={assignedCoordinator}
       />
     </Drawer>
   );
