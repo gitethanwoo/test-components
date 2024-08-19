@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MomAwaitingIntake } from '../types';
+import { MomAwaitingIntake } from '@/app/types';
 import AssignCoordinatorDialog from './AssignCoordinatorDialog';
 import { Pencil, Check } from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";

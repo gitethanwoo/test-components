@@ -2,7 +2,7 @@ import React from 'react';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Report } from '../types';
+import { Report } from '@/app/types';
 
 interface SessionReportDrawerProps {
   isOpen: boolean;

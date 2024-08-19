@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Notification } from '../types';
+import { Notification } from '@/app/types';
 
 interface NotificationModalProps {
   isOpen: boolean;

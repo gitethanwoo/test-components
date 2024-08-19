@@ -2,16 +2,15 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Bell } from 'lucide-react';
-import SessionReportDrawer from '../components/SessionReportDrawer';
-import MomIntakeDrawer from '../components/MomIntakeDrawer';
-import NotificationModal from '../components/NotificationModal';
-import IntakeDialog from '../components/IntakeDialog';
-import ReferOutDialog from '../components/ReferOutDialog';
-import AssignCoordinatorDialog from '../components/AssignCoordinatorDialog';
+import SessionReportDrawer from '@/components/SessionReportDrawer';
+import MomIntakeDrawer from '@/components/MomIntakeDrawer';
+import NotificationModal from '@/components/NotificationModal';
+import IntakeDialog from '@/components/IntakeDialog';
+import ReferOutDialog from '@/components/ReferOutDialog';
+import AssignCoordinatorDialog from '@/components/AssignCoordinatorDialog';
 import { Report, Notification, MomAwaitingIntake } from '../types';
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input"
