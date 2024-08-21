@@ -64,6 +64,11 @@ const AssignCoordinatorDialog: React.FC<AssignCoordinatorDialogProps> = ({
   const getTotalWorkload = (workload: Coordinator['workload']) => 
     Object.values(workload).reduce((a, b) => a + b, 0);
 
+  // Sort coordinators by total workload
+  const sortedCoordinators = [...coordinators].sort((a, b) => 
+    getTotalWorkload(a.workload) - getTotalWorkload(b.workload)
+  );
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[90vh] flex flex-col">
@@ -73,7 +78,7 @@ const AssignCoordinatorDialog: React.FC<AssignCoordinatorDialogProps> = ({
         <ScrollArea className="flex-grow pr-4">
           <RadioGroup value={selectedCoordinator} onValueChange={setSelectedCoordinator}>
             <Accordion type="single" collapsible>
-              {coordinators.map((coordinator) => (
+              {sortedCoordinators.map((coordinator) => (
                 <AccordionItem value={coordinator.name} key={coordinator.name} className="mb-2">
                   <div className="flex items-center space-x-2 w-full p-2 hover:bg-gray-100 rounded-md">
                     <RadioGroupItem 

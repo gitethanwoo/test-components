@@ -4,7 +4,6 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CustomRadioGroup } from "@/components/CustomRadioGroup";
 import { DatePicker } from "@/components/ui/datepicker";
 import { Checkbox } from "@/components/ui/checkbox";
 import { KeyboardEvent } from 'react';
@@ -26,9 +25,10 @@ interface FormSectionProps {
   onPrevious?: () => void;
   onContinue?: () => void;
   continueButtonText?: string;
+  children?: React.ReactNode;
 }
 
-export function FormSection({ title, fields, onPrevious, onContinue, continueButtonText = 'Continue' }: FormSectionProps) {
+export function FormSection({ title, fields, onPrevious, onContinue, continueButtonText = 'Continue', children }: FormSectionProps) {
   const [formData, setFormData] = useState<Record<string, string | Date | string[] | undefined>>({});
 
   const handleInputChange = (name: string, value: string | Date | undefined) => {
@@ -162,6 +162,7 @@ export function FormSection({ title, fields, onPrevious, onContinue, continueBut
             </div>
           ))}
         </CardContent>
+        {children}
         <Separator className="my-6" />
         <CardFooter className="pt-0 pb-4">
           <div className="w-full flex justify-end space-x-3">
