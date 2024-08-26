@@ -29,37 +29,10 @@ const actionItems = [
   { id: 6, task: "Send post-assessment", person: "Rachel Green", role: "Mom", type: 'assessment' },
 ]
 
-export function Dashboard() {
 
-  const NavLinks = () => (
-    <>
-      <Link href="#" className="flex items-center gap-2 text-lg font-semibold" prefetch={false}>
-        <LayoutDashboard className="w-6 h-6" />
-        <span>Dashboard</span>
-      </Link>
-      <Link href="#" className="flex items-center gap-2 text-lg font-semibold" prefetch={false}>
-        <Users className="w-6 h-6" />
-        <span>Your People</span>
-      </Link>
-      <Link href="#" className="flex items-center gap-2 text-lg font-semibold" prefetch={false}>
-        <Workflow className="w-6 h-6" />
-        <span>Tasks</span>
-      </Link>
-      <Link href="#" className="flex items-center gap-2 text-lg font-semibold" prefetch={false}>
-        <FileText className="w-6 h-6" />
-        <span>Reporting</span>
-      </Link>
-      <Link href="#" className="flex items-center gap-2 text-lg font-semibold" prefetch={false}>
-        <Users className="w-6 h-6" />
-        <span>Users</span>
-      </Link>
-      <Link href="#" className="flex items-center gap-2 text-lg font-semibold" prefetch={false}>
-        <Power className="w-6 h-6" />
-        <span>Support</span>
-      </Link>
-    </>
-  )
 
+// Change the default export
+export default function Page() {
   return (
     <div className="flex flex-col lg:flex-row min-h-screen max-w-screen-2xl mx-auto w-full">
       <div className="hidden lg:block lg:w-[280px] xl:w-[280px] xl:min-w-[200px] xl:max-w-[280px] border-r">
@@ -74,9 +47,7 @@ export function Dashboard() {
             </Button>
           </div>
           <div className="flex-1">
-            <nav className="grid items-start px-2 text-sm font-medium">
-              <NavLinks />
-            </nav>
+            {/* Removed the nav element that contained NavLinks */}
           </div>
         </div>
       </div>
@@ -101,7 +72,7 @@ export function Dashboard() {
                 >
                   <span className="text-2xl font-bold">logo</span>
                 </Link>
-                <NavLinks />
+                {/* Removed the NavLinks component */}
               </nav>
             </SheetContent>
           </Sheet>
@@ -202,5 +173,3 @@ export function Dashboard() {
     </div>
   )
 }
-
-export default Dashboard
